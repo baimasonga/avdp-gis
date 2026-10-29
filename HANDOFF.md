@@ -68,6 +68,18 @@ map symbology. Changes:
 - Fixed while verifying: catalogue deep links (`/all#/?…`) and the data
   guide's "your datasets" link used a route that renders a blank page.
 
+## Iteration 3 — GitHub Codespaces demos
+
+- `.devcontainer/demo/` + `scripts/codespace-demo.sh` start a temporary demo in
+  a 4-core / 16 GB codespace (see docs/CODESPACES.md).
+- Found while rehearsing: behind any HTTPS-terminating proxy (Codespaces, a
+  load balancer, Cloudflare) Django built `http://` API links and the map
+  client failed with mixed-content errors; sign-in also needed the public
+  origin trusted. Fixed with `PublicSchemeMiddleware` and CSRF settings
+  derived from `SITEURL`; no effect when `SITEURL` is plain HTTP.
+- Verified by local rehearsal (fresh volumes, HTTPS proxy, 61/61 security
+  checks over HTTPS); **not yet run in a real codespace**.
+
 ## Verification performed (local Docker, this session)
 
 | # | Check | Result |

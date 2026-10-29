@@ -160,6 +160,11 @@ if _public.scheme == "https" and _public.netloc:
 CSRF_TRUSTED_ORIGINS += [o.strip() for o in os.getenv("AVDP_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
 CSRF_TRUSTED_ORIGINS = sorted(set(CSRF_TRUSTED_ORIGINS))
 
+# Must run first so every later component sees the public scheme.
+MIDDLEWARE = ("geonode_project.middleware.PublicSchemeMiddleware",) + tuple(
+    m for m in MIDDLEWARE if m != "geonode_project.middleware.PublicSchemeMiddleware"
+)
+
 # Marker used to identify demonstration content created by `avdp_import_demo`.
 AVDP_DEMO_KEYWORD = "avdp-synthetic-demo"
 AVDP_SYNTHETIC_NOTICE = "SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS."

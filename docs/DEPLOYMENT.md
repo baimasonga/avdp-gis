@@ -58,6 +58,16 @@ self-signed placeholder. Alternatively terminate TLS on an existing reverse
 proxy / load balancer and forward to the nginx container; then keep
 `SITEURL` as the public `https://` URL.
 
+### HTTPS terminated in front of nginx
+
+If TLS ends at a load balancer, Cloudflare or another proxy that forwards plain
+HTTP to the nginx container, keep `HTTPS_HOST` empty and set `SITEURL` (and the
+`GEOSERVER_*_LOCATION` values) to the public `https://` address. The project's
+`PublicSchemeMiddleware` then makes Django generate `https://` links and the
+settings trust that origin for CSRF. Without it, the map client would receive
+`http://` API URLs that browsers block on an HTTPS page. Make sure nginx is not
+reachable except through that proxy.
+
 ## Hardening checklist
 
 - Firewall: allow 80/443 (and SSH from admin addresses only). Never publish

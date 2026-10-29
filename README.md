@@ -108,6 +108,7 @@ groups) unless you add `--public`. Details: [docs/DATA_IMPORT.md](docs/DATA_IMPO
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — local workflow, tests, troubleshooting
 - [docs/DATA_IMPORT.md](docs/DATA_IMPORT.md) — validation, import, metadata, demo-data limitations
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — production prerequisites, HTTPS, storage, backup/restore
+- [docs/CODESPACES.md](docs/CODESPACES.md) — temporary demos in GitHub Codespaces
 - [HANDOFF.md](HANDOFF.md) — what was done, what was verified, what is pending
 
 ## Upstream

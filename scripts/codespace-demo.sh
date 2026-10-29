@@ -38,8 +38,14 @@ setup() {
         return
     fi
     if [ -f .env ]; then
+        # Keep the existing secrets (they must match the database volumes);
+        # only move the public host name.
+        local old
+        old=$(grep '^HTTP_HOST=' .env | cut -d= -f2)
         cp .env ".env.backup.$(date +%s)"
-        echo "Existing .env backed up."
+        sed -i -e "s#${old}#${host}#g" .env
+        echo "Updated .env from ${old} to https://${host}/ (backup kept)."
+        return
     fi
     # Generate random secrets for an HTTP site on this host, then switch the
     # public URLs to https:// (TLS is provided by the Codespaces proxy).
