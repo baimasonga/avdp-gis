@@ -44,6 +44,6 @@ RUN --mount=type=secret,id=extra_ca,required=false \
 
 COPY src/ /usr/src/project/
 RUN chmod +x /usr/src/project/tasks.py /usr/src/project/entrypoint.sh \
-    && yes w | pip install --no-cache-dir --no-deps -e .
+    && pip install --no-cache-dir --no-deps --no-build-isolation -e .
 
 EXPOSE 8000
