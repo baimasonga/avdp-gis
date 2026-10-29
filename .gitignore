@@ -78,3 +78,5 @@ data/demo/*
 !data/demo/README.md
 docker-compose.override.yml
 .local/
+src/celerybeat-schedule*
+src/invoke.log
