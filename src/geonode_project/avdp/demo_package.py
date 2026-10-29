@@ -30,8 +30,23 @@ MAX_ARCHIVE_ENTRIES = 500
 MAX_ARCHIVE_UNCOMPRESSED = 500 * 1024 * 1024
 MAX_COMPRESSION_RATIO = 100
 ALLOWED_EXTENSIONS = {
-    ".shp", ".shx", ".dbf", ".prj", ".cpg", ".qix", ".sbn", ".sbx", ".xml",
-    ".geojson", ".json", ".csv", ".txt", ".md", ".pdf", ".qml", ".sld",
+    ".shp",
+    ".shx",
+    ".dbf",
+    ".prj",
+    ".cpg",
+    ".qix",
+    ".sbn",
+    ".sbx",
+    ".xml",
+    ".geojson",
+    ".json",
+    ".csv",
+    ".txt",
+    ".md",
+    ".pdf",
+    ".qml",
+    ".sld",
 }
 
 
@@ -58,33 +73,75 @@ class LayerSpec:
 
 LAYERS = (
     LayerSpec(
-        "farm_plots", "Farm plots", 50, ("polygon",), "crop-production", "farming",
-        r"farm[\s_-]*plots?", ("crop", "crop_type", "main_crop", "cropname", "crop_name"),
+        "farm_plots",
+        "Farm plots",
+        50,
+        ("polygon",),
+        "crop-production",
+        "farming",
+        r"farm[\s_-]*plots?",
+        ("crop", "crop_type", "main_crop", "cropname", "crop_name"),
     ),
     LayerSpec(
-        "farmer_groups", "Farmer groups", 20, ("point",), "farmer-organizations", "farming",
-        r"farmer[\s_-]*(groups?|org)", ("group_type", "type", "status"),
+        "farmer_groups",
+        "Farmer groups",
+        20,
+        ("point",),
+        "farmer-organizations",
+        "farming",
+        r"farmer[\s_-]*(groups?|org)",
+        ("group_type", "type", "status"),
     ),
     LayerSpec(
-        "feeder_roads", "Feeder roads", 15, ("line",), "rural-infrastructure", "transportation",
-        r"(feeder[\s_-]*)?roads?", ("condition", "status", "surface", "road_cond"),
+        "feeder_roads",
+        "Feeder roads",
+        15,
+        ("line",),
+        "rural-infrastructure",
+        "transportation",
+        r"(feeder[\s_-]*)?roads?",
+        ("condition", "status", "surface", "road_cond"),
     ),
     LayerSpec(
-        "water_points", "Water points", 15, ("point",), "water-infrastructure", "inlandWaters",
-        r"water[\s_-]*points?", ("status", "functional", "condition", "func_stat", "type"),
+        "water_points",
+        "Water points",
+        15,
+        ("point",),
+        "water-infrastructure",
+        "inlandWaters",
+        r"water[\s_-]*points?",
+        ("status", "functional", "condition", "func_stat", "type"),
     ),
     LayerSpec(
-        "grain_stores", "Grain stores", 10, ("point", "polygon"), "storage-facilities", "structure",
-        r"(grain[\s_-]*)?stor(e|es|age)", ("status", "condition", "type"),
+        "grain_stores",
+        "Grain stores",
+        10,
+        ("point", "polygon"),
+        "storage-facilities",
+        "structure",
+        r"(grain[\s_-]*)?stor(e|es|age)",
+        ("status", "condition", "type"),
     ),
     LayerSpec(
-        "distribution_sites", "Distribution sites", 15, ("point",), "input-distribution", "farming",
-        r"(input[\s_-]*)?distribution([\s_-]*sites?)?", ("input_type", "inputs", "status", "type"),
+        "distribution_sites",
+        "Distribution sites",
+        15,
+        ("point",),
+        "input-distribution",
+        "farming",
+        r"(input[\s_-]*)?distribution([\s_-]*sites?)?",
+        ("input_type", "inputs", "status", "type"),
         initially_visible=False,
     ),
     LayerSpec(
-        "demonstration_plots", "Demonstration plots", 15, ("point", "polygon"), "demonstration-extension", "farming",
-        r"demo(nstration)?[\s_-]*plots?", ("crop", "technology", "status", "practice"),
+        "demonstration_plots",
+        "Demonstration plots",
+        15,
+        ("point", "polygon"),
+        "demonstration-extension",
+        "farming",
+        r"demo(nstration)?[\s_-]*plots?",
+        ("crop", "technology", "status", "practice"),
         initially_visible=False,
     ),
 )
@@ -154,7 +211,11 @@ def safe_extract(zip_path, dest_dir):
             total += info.file_size
             if total > MAX_ARCHIVE_UNCOMPRESSED:
                 raise PackageError("Archive content exceeds the size limit.")
-            if info.compress_size and info.file_size / info.compress_size > MAX_COMPRESSION_RATIO and info.file_size > 1024 * 1024:
+            if (
+                info.compress_size
+                and info.file_size / info.compress_size > MAX_COMPRESSION_RATIO
+                and info.file_size > 1024 * 1024
+            ):
                 raise PackageError(f"Suspicious compression ratio for {info.filename!r}.")
             plan.append((info, name))
 
@@ -316,7 +377,9 @@ def inspect_vector(path, spec):
         report.errors.append(f"Coordinate reference system is {report.epsg}, expected EPSG:4326.")
     if report.extent:
         x0, y0, x1, y1 = SIERRA_LEONE_ENVELOPE
-        if not (x0 <= report.extent[0] and report.extent[2] <= x1 and y0 <= report.extent[1] and report.extent[3] <= y1):
+        if not (
+            x0 <= report.extent[0] and report.extent[2] <= x1 and y0 <= report.extent[1] and report.extent[3] <= y1
+        ):
             report.errors.append(f"Extent {report.extent} falls outside the Sierra Leone sanity envelope.")
     if path.lower().endswith(".shp") and not os.path.exists(os.path.splitext(path)[0] + ".prj"):
         report.errors.append("Shapefile has no .prj (coordinate system definition).")
@@ -361,7 +424,12 @@ def validate(found):
             vector_fields = set()
             for source in report.sources.values():
                 vector_fields |= {f.lower()[:10] for f in source.fields}
-            missing = [c for c in header if c.lower()[:10] not in vector_fields and c.lower() not in ("wkt", "geometry", "lon", "lat", "longitude", "latitude", "x", "y")]
+            missing = [
+                c
+                for c in header
+                if c.lower()[:10] not in vector_fields
+                and c.lower() not in ("wkt", "geometry", "lon", "lat", "longitude", "latitude", "x", "y")
+            ]
             if missing and vector_fields:
                 report.warnings.append(f"CSV columns not present in the vector attributes: {missing}")
         else:
@@ -419,7 +487,8 @@ def distinct_values(path, max_values=20):
     layer = ds.GetLayer(0)
     defn = layer.GetLayerDefn()
     string_fields = [
-        defn.GetFieldDefn(i).GetName() for i in range(defn.GetFieldCount())
+        defn.GetFieldDefn(i).GetName()
+        for i in range(defn.GetFieldCount())
         if defn.GetFieldDefn(i).GetType() == ogr.OFTString
     ]
     values = {f: set() for f in string_fields}

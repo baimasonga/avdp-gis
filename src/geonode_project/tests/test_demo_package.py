@@ -141,8 +141,14 @@ class StyleTests(unittest.TestCase):
     def test_categorised_sld_is_well_formed(self):
         from xml.etree import ElementTree
 
-        sld = styles.build_sld("water_points", "avdp_demo_water_points", "Water points", ["point"],
-                               "status", ["Functional", "Needs <repair>"])
+        sld = styles.build_sld(
+            "water_points",
+            "avdp_demo_water_points",
+            "Water points",
+            ["point"],
+            "status",
+            ["Functional", "Needs <repair>"],
+        )
         root = ElementTree.fromstring(sld)
         rules = root.findall(".//{http://www.opengis.net/sld}Rule")
         self.assertEqual(len(rules), 3)  # two categories + "other"

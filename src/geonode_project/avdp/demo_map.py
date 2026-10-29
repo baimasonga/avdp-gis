@@ -49,8 +49,10 @@ def build_map_payload(spec_datasets):
     background = [dict(b, id=b.get("id") or f"{b['source']}__{i}") for i, b in enumerate(settings.MAPSTORE_BASELAYERS)]
     # Polygons first (bottom), then lines, then points on top.
     order = {"polygon": 0, "line": 1, "point": 2}
-    ordered = sorted(spec_datasets, key=lambda sd: order[sd[0].geometry[-1] if sd[0].key == "demonstration_plots"
-                                                         else sd[0].geometry[0]])
+    ordered = sorted(
+        spec_datasets,
+        key=lambda sd: order[sd[0].geometry[-1] if sd[0].key == "demonstration_plots" else sd[0].geometry[0]],
+    )
     layers = [_layer(spec, ds, ows_url) for spec, ds in ordered]
     blob = {
         "version": 2,

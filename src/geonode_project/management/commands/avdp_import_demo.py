@@ -74,17 +74,30 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("package", help="Path to AVDP_Synthetic_GIS_Sample_Package.zip or an extracted directory")
         parser.add_argument("--owner", default=os.getenv("ADMIN_USERNAME", "admin"), help="Owner of the resources")
-        parser.add_argument("--prefer", choices=("geojson", "shapefile"), default="geojson",
-                            help="Source format to upload when both are present (default: geojson)")
+        parser.add_argument(
+            "--prefer",
+            choices=("geojson", "shapefile"),
+            default="geojson",
+            help="Source format to upload when both are present (default: geojson)",
+        )
         parser.add_argument("--viewers-group", default="avdp-viewers", help="Group granted view+download")
         parser.add_argument("--editors-group", default="avdp-editors", help="Group granted edit")
-        parser.add_argument("--public", action="store_true",
-                            help="Also let anonymous visitors view the demo datasets and map (default: private)")
-        parser.add_argument("--adopt", action="store_true",
-                            help="Treat an unmarked dataset with the exact target name as a previous partial run")
-        parser.add_argument("--import-alongside", action="store_true",
-                            help="If an unrelated dataset already uses the target name, import anyway "
-                                 "(GeoNode assigns a new unique name; the existing dataset is not touched)")
+        parser.add_argument(
+            "--public",
+            action="store_true",
+            help="Also let anonymous visitors view the demo datasets and map (default: private)",
+        )
+        parser.add_argument(
+            "--adopt",
+            action="store_true",
+            help="Treat an unmarked dataset with the exact target name as a previous partial run",
+        )
+        parser.add_argument(
+            "--import-alongside",
+            action="store_true",
+            help="If an unrelated dataset already uses the target name, import anyway "
+            "(GeoNode assigns a new unique name; the existing dataset is not touched)",
+        )
         parser.add_argument("--skip-map", action="store_true", help="Do not create/update the demo map")
         parser.add_argument("--timeout", type=int, default=600, help="Seconds to wait for each import")
         parser.add_argument("--validate-only", action="store_true", help="Validate the package and stop")
@@ -136,8 +149,10 @@ class Command(BaseCommand):
             total = sum(counts.values())
             for spec in dp.LAYERS:
                 flag = "OK" if counts[spec.key] == spec.expected_count else "MISMATCH"
-                self.stdout.write(f"  {spec.title:<22} {counts[spec.key]:>4}/{spec.expected_count:<4} {flag}"
-                                  f"  -> {datasets[spec.key].alternate}")
+                self.stdout.write(
+                    f"  {spec.title:<22} {counts[spec.key]:>4}/{spec.expected_count:<4} {flag}"
+                    f"  -> {datasets[spec.key].alternate}"
+                )
             msg = f"Imported feature total: {total} (expected {dp.EXPECTED_TOTAL})"
             if total != dp.EXPECTED_TOTAL:
                 raise CommandError(msg)
@@ -183,8 +198,13 @@ class Command(BaseCommand):
         try:
             if source.lower().endswith(".shp"):
                 stem = os.path.splitext(source)[0]
-                for ext, key in (("shp", "base_file"), ("dbf", "dbf_file"), ("shx", "shx_file"),
-                                 ("prj", "prj_file"), ("cpg", "cpg_file")):
+                for ext, key in (
+                    ("shp", "base_file"),
+                    ("dbf", "dbf_file"),
+                    ("shx", "shx_file"),
+                    ("prj", "prj_file"),
+                    ("cpg", "cpg_file"),
+                ):
                     src = f"{stem}.{ext}"
                     if os.path.exists(src):
                         dst = os.path.join(stage, f"{spec.dataset_name}.{ext}")
@@ -207,13 +227,16 @@ class Command(BaseCommand):
             for handle in handles:
                 handle.close()
         if response.status_code != 201:
-            raise CommandError(f"{spec.title}: importer rejected the upload ({response.status_code}): "
-                               f"{getattr(response, 'data', response.content)}")
+            raise CommandError(
+                f"{spec.title}: importer rejected the upload ({response.status_code}): "
+                f"{getattr(response, 'data', response.content)}"
+            )
         exec_id = response.data["execution_id"]
         dataset = self._wait_for(spec, exec_id)
         # Mark immediately so a re-run recognises this dataset even if a later step fails.
-        _manager(dataset).update(dataset.uuid, instance=dataset, keywords=[settings.AVDP_DEMO_KEYWORD, spec.marker_keyword],
-                                notify=False)
+        _manager(dataset).update(
+            dataset.uuid, instance=dataset, keywords=[settings.AVDP_DEMO_KEYWORD, spec.marker_keyword], notify=False
+        )
         return Dataset.objects.get(pk=dataset.pk)
 
     def _wait_for(self, spec, exec_id):
@@ -270,7 +293,8 @@ class Command(BaseCommand):
             _thesaurus_keyword(CATEGORY_THESAURUS_TITLE, spec.category),
             _thesaurus_keyword(STATUS_THESAURUS_TITLE, "synthetic-demonstration"),
         ]
-        dataset = _manager(dataset).update(dataset.uuid, instance=dataset, vals=vals, keywords=keywords, regions=["SLE"], notify=False
+        dataset = _manager(dataset).update(
+            dataset.uuid, instance=dataset, vals=vals, keywords=keywords, regions=["SLE"], notify=False
         )
         self._apply_style(spec, dataset, files)
         self._refresh_thumbnail(dataset)
@@ -282,8 +306,9 @@ class Command(BaseCommand):
         report = dp.inspect_vector(source, spec)
         values = dp.distinct_values(source)
         field = dp.style_field(spec, report.fields, values)
-        sld = styles.build_sld(spec.key, dataset.name, spec.title, report.geometry_families,
-                               field, values.get(field, ()) if field else ())
+        sld = styles.build_sld(
+            spec.key, dataset.name, spec.title, report.geometry_families, field, values.get(field, ()) if field else ()
+        )
         sld_path = os.path.join(tempfile.mkdtemp(prefix="avdp_sld_"), f"{dataset.name}.sld")
         with open(sld_path, "w") as handle:
             handle.write(sld)
@@ -295,15 +320,16 @@ class Command(BaseCommand):
             with open(sld_path, "rb") as base, open(sld_path, "rb") as sld:
                 response = client.post(
                     reverse("importer_upload"),
-                    {"base_file": base, "sld_file": sld, "action": "resource_style_upload",
-                     "resource_pk": dataset.pk},
+                    {"base_file": base, "sld_file": sld, "action": "resource_style_upload", "resource_pk": dataset.pk},
                     format="multipart",
                 )
         finally:
             shutil.rmtree(os.path.dirname(sld_path), ignore_errors=True)
         if response.status_code != 201:
-            raise CommandError(f"{spec.title}: style upload rejected ({response.status_code}): "
-                               f"{getattr(response, 'data', response.content)}")
+            raise CommandError(
+                f"{spec.title}: style upload rejected ({response.status_code}): "
+                f"{getattr(response, 'data', response.content)}"
+            )
         exec_id = response.data["execution_id"]
         deadline = time.time() + self.opts["timeout"]
         while time.time() < deadline:
@@ -336,17 +362,30 @@ class Command(BaseCommand):
         registered = Group.objects.filter(name="registered-members").first()
         owner = resource.owner
         spec = {
-            "users": [{
-                "id": owner.id, "username": owner.username, "first_name": owner.first_name or "",
-                "last_name": owner.last_name or "", "avatar": "", "permissions": "owner",
-                "is_staff": owner.is_staff, "is_superuser": owner.is_superuser,
-            }],
+            "users": [
+                {
+                    "id": owner.id,
+                    "username": owner.username,
+                    "first_name": owner.first_name or "",
+                    "last_name": owner.last_name or "",
+                    "avatar": "",
+                    "permissions": "owner",
+                    "is_staff": owner.is_staff,
+                    "is_superuser": owner.is_superuser,
+                }
+            ],
             "organizations": [
                 {"id": viewers.group.id, "name": viewers.group.name, "title": viewers.title, "permissions": "download"},
                 {"id": editors.group.id, "name": editors.group.name, "title": editors.title, "permissions": "edit"},
             ],
-            "groups": [{"id": anonymous.id, "name": "anonymous", "title": "anonymous",
-                        "permissions": "view" if self.opts["public"] else "none"}],
+            "groups": [
+                {
+                    "id": anonymous.id,
+                    "name": "anonymous",
+                    "title": "anonymous",
+                    "permissions": "view" if self.opts["public"] else "none",
+                }
+            ],
         }
         if registered:
             spec["groups"].append(
@@ -393,7 +432,8 @@ class Command(BaseCommand):
         if response.status_code not in (200, 201):
             raise CommandError(f"Map {action} failed ({response.status_code}): {json.dumps(response.data)[:500]}")
         map_obj = Map.objects.get(pk=response.data["map"]["pk"])
-        _manager(map_obj).update(map_obj.uuid,
+        _manager(map_obj).update(
+            map_obj.uuid,
             instance=map_obj,
             vals={
                 "abstract": (
@@ -403,8 +443,13 @@ class Command(BaseCommand):
                 "constraints_other": f"{dp.SYNTHETIC_NOTICE} For demonstration and training only.",
                 "category": TopicCategory.objects.filter(identifier="farming").first(),
             },
-            keywords=[settings.AVDP_DEMO_KEYWORD, MAP_MARKER, "synthetic data", "demonstration",
-                      _thesaurus_keyword(STATUS_THESAURUS_TITLE, "synthetic-demonstration")],
+            keywords=[
+                settings.AVDP_DEMO_KEYWORD,
+                MAP_MARKER,
+                "synthetic data",
+                "demonstration",
+                _thesaurus_keyword(STATUS_THESAURUS_TITLE, "synthetic-demonstration"),
+            ],
             regions=["SLE"],
             notify=False,
         )

@@ -70,23 +70,30 @@ def build(zip_path, seed=42):
             field_name, values = VALUES[spec.key]
             rows = []
             for i in range(spec.expected_count):
-                rows.append({
-                    "site_id": f"{spec.key[:3].upper()}-{i + 1:03d}",
-                    "name": f"Test {spec.title.lower()} {i + 1}",
-                    field_name: rng.choice(values),
-                    "dist_label": rng.choice(DISTRICTS),
-                    "benefic": rng.randint(5, 120),
-                    "synthetic": "yes",
-                    "geom": _geometry(rng, family),
-                })
+                rows.append(
+                    {
+                        "site_id": f"{spec.key[:3].upper()}-{i + 1:03d}",
+                        "name": f"Test {spec.title.lower()} {i + 1}",
+                        field_name: rng.choice(values),
+                        "dist_label": rng.choice(DISTRICTS),
+                        "benefic": rng.randint(5, 120),
+                        "synthetic": "yes",
+                        "geom": _geometry(rng, family),
+                    }
+                )
             for driver, folder, ext in (("GeoJSON", "geojson", "geojson"), ("ESRI Shapefile", "shapefiles", "shp")):
                 path = os.path.join(root, folder, f"{spec.key}.{ext}")
                 ds = ogr.GetDriverByName(driver).CreateDataSource(path)
                 gtype = {"point": ogr.wkbPoint, "line": ogr.wkbLineString, "polygon": ogr.wkbPolygon}[family]
                 layer = ds.CreateLayer(spec.key, srs, gtype)
-                for name, ftype in (("site_id", ogr.OFTString), ("name", ogr.OFTString), (field_name, ogr.OFTString),
-                                    ("dist_label", ogr.OFTString), ("benefic", ogr.OFTInteger),
-                                    ("synthetic", ogr.OFTString)):
+                for name, ftype in (
+                    ("site_id", ogr.OFTString),
+                    ("name", ogr.OFTString),
+                    (field_name, ogr.OFTString),
+                    ("dist_label", ogr.OFTString),
+                    ("benefic", ogr.OFTInteger),
+                    ("synthetic", ogr.OFTString),
+                ):
                     layer.CreateField(ogr.FieldDefn(name, ftype))
                 for row in rows:
                     feat = ogr.Feature(layer.GetLayerDefn())
@@ -100,8 +107,16 @@ def build(zip_path, seed=42):
                 writer = csv.writer(handle)
                 writer.writerow(["site_id", "name", field_name, "dist_label", "benefic", "synthetic"])
                 for row in rows:
-                    writer.writerow([row["site_id"], row["name"], row[field_name], row["dist_label"],
-                                     row["benefic"], row["synthetic"]])
+                    writer.writerow(
+                        [
+                            row["site_id"],
+                            row["name"],
+                            row[field_name],
+                            row["dist_label"],
+                            row["benefic"],
+                            row["synthetic"],
+                        ]
+                    )
         with open(os.path.join(root, "README.txt"), "w") as handle:
             handle.write(FIXTURE_LABEL + "\n")
         with open(os.path.join(root, "fixture.json"), "w") as handle:

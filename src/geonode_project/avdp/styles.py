@@ -13,13 +13,18 @@ PALETTE = ["#0072B2", "#009E73", "#E69F00", "#CC79A7", "#56B4E9", "#D55E00", "#F
 # key -> base symbol definition
 SYMBOLS = {
     "farm_plots": {"kind": "polygon", "fill": "#7fbf7b", "stroke": "#1b5e20", "opacity": 0.55},
-    "demonstration_plots": {"kind": "polygon", "fill": "#9ecae1", "stroke": "#08519c", "opacity": 0.5,
-                            "point_mark": "star", "point_fill": "#08519c"},
+    "demonstration_plots": {
+        "kind": "polygon",
+        "fill": "#9ecae1",
+        "stroke": "#08519c",
+        "opacity": 0.5,
+        "point_mark": "star",
+        "point_fill": "#08519c",
+    },
     "feeder_roads": {"kind": "line", "stroke": "#8c510a", "width": 3},
     "farmer_groups": {"kind": "point", "mark": "circle", "fill": "#2e6b34", "size": 10},
     "water_points": {"kind": "point", "mark": "triangle", "fill": "#1d5a8e", "size": 12},
-    "grain_stores": {"kind": "point", "mark": "square", "fill": "#b26a00", "size": 11,
-                     "polygon_fill": "#f6c26b"},
+    "grain_stores": {"kind": "point", "mark": "square", "fill": "#b26a00", "size": 11, "polygon_fill": "#f6c26b"},
     "distribution_sites": {"kind": "point", "mark": "cross", "fill": "#6a3d9a", "size": 12},
 }
 
@@ -73,8 +78,11 @@ def _symbolizers(key, families, colour=None):
         out.append(_line(colour or sym["stroke"], sym.get("width", 2)))
     if "point" in families:
         out.append(
-            _point(sym.get("mark") or sym.get("point_mark", "circle"), colour or sym.get("fill") or sym.get("point_fill"),
-                   sym.get("size", 10))
+            _point(
+                sym.get("mark") or sym.get("point_mark", "circle"),
+                colour or sym.get("fill") or sym.get("point_fill"),
+                sym.get("size", 10),
+            )
         )
     return "\n".join(out)
 
