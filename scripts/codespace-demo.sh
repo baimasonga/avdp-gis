@@ -78,9 +78,36 @@ wait_healthy() {
     return 1
 }
 
+wait_django() {
+    # Django's first start (migrations, static files) can take a long time.
+    # A container can recover from "unhealthy", so keep waiting until it is
+    # healthy or the deadline passes, instead of giving up on the first failure.
+    local deadline=$((SECONDS + 1800)) state=""
+    echo "Waiting for Django to finish its first start (migrations, static files)..."
+    while [ $SECONDS -lt $deadline ]; do
+        state=$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q django)" 2>/dev/null || true)
+        if [ "$state" = "healthy" ]; then
+            echo "Django is healthy."
+            return 0
+        fi
+        if [ -z "$(docker compose ps -q --status running django)" ]; then
+            echo "The django container is not running:" >&2
+            docker compose logs --tail 60 django >&2
+            return 1
+        fi
+        sleep 15
+    done
+    echo "Django did not become healthy in time (last state: ${state:-unknown})." >&2
+    docker compose logs --tail 60 django >&2
+    return 1
+}
+
 start() {
     [ -f .env ] || setup
     docker compose build
+    # Start Django and its dependencies first, wait for it, then the rest.
+    docker compose up -d django || true
+    wait_django
     docker compose up -d
     wait_healthy
 }

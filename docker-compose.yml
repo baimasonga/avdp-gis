@@ -46,8 +46,12 @@ services:
     container_name: django4${COMPOSE_PROJECT_NAME}
     healthcheck:
       test: "curl -m 10 --fail --silent --output /dev/null http://django:8000/"
-      start_period: 120s
-      interval: 60s
+      # The first start runs ~420 migrations and collects static files, which
+      # can take well over 5 minutes on slower disks (e.g. GitHub Codespaces).
+      # Failures during start_period are not counted; the container is marked
+      # healthy as soon as a check passes, so a long period costs nothing.
+      start_period: 900s
+      interval: 30s
       timeout: 10s
       retries: 3
     environment:
