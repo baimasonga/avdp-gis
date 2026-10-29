@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geonode_project"
-version = "5.dev"
-description = "GeoNode Project"
-readme = "README.md"
+version = "0.1.0"
+description = "AVDP GIS Portal - GeoNode project"
 requires-python = ">=3.10"
 license = { text = "GPL-3.0-or-later" }
 keywords = ["project", "geonode", "django"]
 
 dependencies = [
-    "GeoNode @ https://github.com/GeoNode/geonode/archive/refs/heads/master.zip"
+    # Pinned to the latest stable GeoNode release; see docs/ARCHITECTURE.md
+    "GeoNode==5.1.1",
 ]
 
 [project.urls]

@@ -1,3 +1,17 @@
+# AVDP GIS Portal - Docker Compose stack
+#
+# Service layout follows geonode-project 5.1.x (GeoNode 5.1.1):
+#   django + celery  -> GeoNode application and background workers (same image)
+#   geonode (nginx)  -> public entry point; proxies /geoserver/ and serves statics
+#   geoserver        -> OGC map server (only reachable through nginx)
+#   data-dir-conf    -> seeds the GeoServer data directory on first start
+#   db               -> PostgreSQL/PostGIS (internal only)
+#   redis            -> Celery broker / result backend (internal only)
+#   memcached        -> optional Django cache (internal only)
+#   letsencrypt      -> optional; only started with the "https" profile
+#
+# Image versions are set in .env (see .env.example).
+
 x-common-django:
   &default-common-django
   image: ${COMPOSE_PROJECT_NAME}/geonode:${GEONODE_BASE_IMAGE_VERSION}
@@ -5,12 +19,14 @@ x-common-django:
   env_file:
     - .env
   volumes:
-    # - './src:/usr/src/project'  # Uncomment for local development
+    # - './src:/usr/src/project'  # Uncomment for live-editing project code (see docs/DEVELOPMENT.md)
     - statics:/mnt/volumes/statics
     - geoserver-data-dir:/geoserver_data/data
     - backup-restore:/backup_restore
     - data:/data
     - tmp:/tmp
+    # Read-only drop folder for demonstration packages (see docs/DATA_IMPORT.md)
+    - ./data/demo:/usr/src/project/data/demo:ro
   depends_on:
     db:
       condition: service_healthy
@@ -19,70 +35,92 @@ x-common-django:
 
 services:
 
-  # Our custom django application. It includes Geonode.
+  # GeoNode Django application (uWSGI).
   django:
     << : *default-common-django
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        - GEONODE_BASE_IMAGE=${GEONODE_BASE_IMAGE}
     container_name: django4${COMPOSE_PROJECT_NAME}
     healthcheck:
       test: "curl -m 10 --fail --silent --output /dev/null http://django:8000/"
-      start_period: 60s
+      start_period: 120s
       interval: 60s
       timeout: 10s
-      retries: 2
+      retries: 3
     environment:
       - IS_CELERY=False
     entrypoint: ["/usr/src/project/entrypoint.sh"]
     command: "uwsgi --ini /usr/src/project/uwsgi.ini"
 
-  # Celery worker that executes celery tasks created by Django.
+  # Celery worker that executes asynchronous tasks (uploads, thumbnails, harvesting).
   celery:
     << : *default-common-django
     container_name: celery4${COMPOSE_PROJECT_NAME}
+    depends_on:
+      django:
+        condition: service_healthy
     environment:
       - IS_CELERY=True
     entrypoint: ["/usr/src/project/entrypoint.sh"]
     command: "celery-cmd"
     healthcheck:
-      test: "celery -b ${BROKER_URL} inspect ping"
-      start_period: 30s
-      interval: 30s
-      timeout: 10s
-      retries: 2
+      test: "celery -b $${BROKER_URL} inspect ping -t 10 || exit 1"
+      start_period: 60s
+      interval: 60s
+      timeout: 20s
+      retries: 3
 
-  # Nginx serving django static/media and proxies to django/geonode
-  nginx:
+  # Nginx: the only service published on the host.
+  geonode:
     image: ${COMPOSE_PROJECT_NAME}/nginx:${NGINX_BASE_IMAGE_VERSION}
     build:
       context: ./docker/nginx
       dockerfile: Dockerfile
       args:
-        - BASE_IMAGE_VERSION=${NGINX_BASE_IMAGE_VERSION}
+        - BASE_IMAGE_VERSION=${NGINX_BASE_IMAGE_VERSION}@${NGINX_BASE_IMAGE_DIGEST}
     container_name: nginx4${COMPOSE_PROJECT_NAME}
     env_file:
       - .env
     environment:
       - RESOLVER=127.0.0.11
     ports:
-      - "${HTTP_PORT}:80"
-      - "${HTTPS_PORT}:443"
+      # HTTP_BIND defaults to 127.0.0.1 so a development stack is not reachable
+      # from the network. Set HTTP_BIND=0.0.0.0 only on a server behind a firewall.
+      - "${HTTP_BIND:-127.0.0.1}:${HTTP_PORT}:80"
+      - "${HTTP_BIND:-127.0.0.1}:${HTTPS_PORT}:443"
     volumes:
       - nginx-confd:/etc/nginx
       - nginx-certificates:/geonode-certificates
       - statics:/mnt/volumes/statics
     restart: unless-stopped
     healthcheck:
-      test: "if ps -o pid | grep -w 1 > /dev/null; then echo 'nginx running'; else exit 1;fi"
-      interval: 10s
+      test: "nc -z 127.0.0.1 80 || exit 1"
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
 
-  # Gets and installs letsencrypt certificates
+  # Optional Django cache (MEMCACHED_ENABLED in .env).
+  memcached:
+    image: ${MEMCACHED_IMAGE}
+    container_name: memcached4${COMPOSE_PROJECT_NAME}
+    command: memcached ${MEMCACHED_OPTIONS}
+    restart: unless-stopped
+    healthcheck:
+      test: nc -z 127.0.0.1 11211
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  # Let's Encrypt certificates. Only needed for public HTTPS deployments:
+  #   docker compose --profile https up -d
   letsencrypt:
     image: ${COMPOSE_PROJECT_NAME}/letsencrypt:${LETSENCRYPT_BASE_IMAGE_VERSION}
+    profiles: ["https"]
     build:
       context: ./docker/letsencrypt
       dockerfile: Dockerfile
@@ -94,23 +132,20 @@ services:
     volumes:
       - nginx-certificates:/geonode-certificates
     restart: unless-stopped
-    depends_on:
-      nginx:
-        condition: service_healthy
 
-  # Geoserver backend
+  # GeoServer. Not published on the host; reached through nginx at /geoserver/.
   geoserver:
     image: ${COMPOSE_PROJECT_NAME}/geoserver:${GEOSERVER_BASE_IMAGE_VERSION}
     build:
       context: ./docker/geoserver
       dockerfile: Dockerfile
       args:
-        - BASE_IMAGE_VERSION=${GEOSERVER_BASE_IMAGE_VERSION}
+        - BASE_IMAGE_VERSION=${GEOSERVER_BASE_IMAGE_VERSION}@${GEOSERVER_BASE_IMAGE_DIGEST}
     container_name: geoserver4${COMPOSE_PROJECT_NAME}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://geoserver:8080/geoserver/web/wicket/resource/org.geoserver.web.GeoServerBasePage/img/logo.png"]
-      start_period: 30s
-      interval: 30s
+      test: "curl -m 10 --fail --silent --output /dev/null http://geoserver:8080/geoserver/ows"
+      start_period: 90s
+      interval: 60s
       timeout: 10s
       retries: 3
     env_file:
@@ -123,17 +158,38 @@ services:
       - tmp:/tmp
     restart: unless-stopped
     depends_on:
+      data-dir-conf:
+        condition: service_healthy
       django:
         condition: service_healthy
 
-  # PostGIS database.
+  # Copies the GeoNode-flavoured GeoServer data directory into the volume on first start.
+  data-dir-conf:
+    image: ${COMPOSE_PROJECT_NAME}/geoserver_data:${GEOSERVER_DATA_BASE_IMAGE_VERSION}
+    build:
+      context: ./docker/geoserver_data
+      dockerfile: Dockerfile
+      args:
+        - BASE_IMAGE_VERSION=${GEOSERVER_DATA_BASE_IMAGE_VERSION}@${GEOSERVER_DATA_BASE_IMAGE_DIGEST}
+    container_name: gsconf4${COMPOSE_PROJECT_NAME}
+    entrypoint: sleep infinity
+    volumes:
+      - geoserver-data-dir:/geoserver_data/data
+    restart: unless-stopped
+    healthcheck:
+      test: "test -n \"$$(ls -A /geoserver_data/data)\""
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # PostgreSQL + PostGIS. Internal only.
   db:
     image: ${COMPOSE_PROJECT_NAME}/postgis:${POSTGRES_BASE_IMAGE_VERSION}
     build:
       context: ./docker/postgresql
       dockerfile: Dockerfile
       args:
-        - BASE_IMAGE_VERSION=${POSTGRES_BASE_IMAGE_VERSION}
+        - BASE_IMAGE_VERSION=${POSTGRES_BASE_IMAGE_VERSION}@${POSTGRES_BASE_IMAGE_DIGEST}
     command: postgres -c "max_connections=${POSTGRESQL_MAX_CONNECTIONS}"
     container_name: db4${COMPOSE_PROJECT_NAME}
     env_file:
@@ -146,16 +202,15 @@ services:
       test: ["CMD-SHELL", "pg_isready -d postgres -U postgres"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      # uncomment to enable remote connections to postgres
-      #ports:
-      #  - "5432:5432"
+      retries: 10
+    # Do not publish 5432 on the host. For local SQL access use:
+    #   docker compose exec db psql -U postgres
 
-  # Vanilla Redis service. This is needed by celery
+  # Redis: Celery broker and result backend. Internal only.
   redis:
-    image: redis:8-alpine
+    image: ${REDIS_IMAGE}
     container_name: redis4${COMPOSE_PROJECT_NAME}
-    command: redis-server --maxmemory 512mb --maxmemory-policy noeviction --appendonly yes
+    command: redis-server --appendonly yes
     volumes:
       - redisdata:/data
     restart: unless-stopped

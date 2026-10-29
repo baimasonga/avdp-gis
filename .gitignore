@@ -70,3 +70,11 @@ local_settings.py
 .vagrant/
 Vagrantfile
 /.env
+
+# AVDP: local environment files and data drops (never commit secrets or data)
+.env.*
+!.env.example
+data/demo/*
+!data/demo/README.md
+docker-compose.override.yml
+.local/

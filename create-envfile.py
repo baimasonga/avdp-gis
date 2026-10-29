@@ -126,7 +126,9 @@ def generate_env_file(args):
             _sample_file,
         )
 
-    with open(f"{dir_path}/.env", "w+") as output_env:
+    # The generated file contains secrets: create it readable by the owner only.
+    fd = os.open(f"{dir_path}/.env", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as output_env:
         output_env.write(_sample_file)
     logger.info(f".env file created: {dir_path}/.env")
 
@@ -156,8 +158,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-sf",
         "--sample_file",
-        help=f"Path of the sample file to use as a template. Default is: {dir_path}/.env.sample",
-        default=f"{dir_path}/.env.sample",
+        help=f"Path of the sample file to use as a template. Default is: {dir_path}/.env.example",
+        default=f"{dir_path}/.env.example",
     )
     parser.add_argument(
         "-f",
