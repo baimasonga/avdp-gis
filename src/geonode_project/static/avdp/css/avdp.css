@@ -227,3 +227,18 @@
     color: #0b3354;
     text-decoration: underline;
 }
+@media (max-width: 600px) {
+    .avdp-synthetic-banner {
+        left: 0.5rem;
+        right: 5rem;
+        /* stay above the map footer so the basemap attribution remains visible */
+        bottom: 10.5rem;
+        transform: none;
+        max-width: none;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+    }
+    .avdp-synthetic-banner span {
+        display: none;
+    }
+}
