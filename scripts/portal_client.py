@@ -26,6 +26,24 @@ class PortalClient:
         self._unsecure_cookies()
         return r
 
+    def ogc_token(self):
+        """The per-user key the map client appends to GeoServer requests as access_token.
+
+        Read from the page configuration like the browser client does; kept in
+        memory only and never logged.
+        """
+        if not hasattr(self, "_ogc_token"):
+            m = re.search(r"apikey: '([^']*)'", self.get("/catalogue/").text)
+            self._ogc_token = m.group(1) if m and m.group(1) else None
+        return self._ogc_token
+
+    def ogc(self, path, **kw):
+        """GET a GeoServer URL, authenticated the same way as the map client."""
+        token = self.ogc_token()
+        if token:
+            path += ("&" if "?" in path else "?") + "access_token=" + token
+        return self.get(path, **kw)
+
     def csrf(self):
         return self.s.cookies.get("csrftoken")
 

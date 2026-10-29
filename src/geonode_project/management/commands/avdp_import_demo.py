@@ -271,6 +271,7 @@ class Command(BaseCommand):
         dataset = _manager(dataset).update(dataset.uuid, instance=dataset, vals=vals, keywords=keywords, regions=["SLE"], notify=False
         )
         self._apply_style(spec, dataset, files)
+        self._refresh_thumbnail(dataset)
         self._apply_permissions(dataset)
         self.stdout.write(f"{spec.title}: metadata, style and sharing applied.")
 
@@ -312,6 +313,13 @@ class Command(BaseCommand):
             time.sleep(1)
         styled_by = f" by '{field}'" if field else ""
         self.stdout.write(f"{spec.title}: style applied{styled_by}.")
+
+    def _refresh_thumbnail(self, resource):
+        """Re-render the thumbnail so it shows the AVDP style rather than the default one."""
+        try:
+            _manager(resource).set_thumbnail(resource.uuid, instance=resource, overwrite=True, check_bbox=False)
+        except Exception as exc:  # thumbnails are cosmetic; never fail the import for them
+            self.stdout.write(self.style.WARNING(f"Thumbnail not refreshed for {resource}: {exc}"))
 
     def _perm_spec(self, resource):
         def group(name):
@@ -398,5 +406,6 @@ class Command(BaseCommand):
             regions=["SLE"],
             notify=False,
         )
+        self._refresh_thumbnail(map_obj)
         self._apply_permissions(map_obj)
         self.stdout.write(self.style.SUCCESS(f"Map '{MAP_TITLE}' {action}: {map_obj.detail_url}"))
