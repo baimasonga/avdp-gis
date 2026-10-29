@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}
+AVDP navigation. Upload Data is only shown to users who can add resources;
+GeoNode still enforces the permission on the upload page and API.
+{% endcomment %}
+<li>
+    <a id="datasets" href="/datasets" target="" class="nav-link btn btn-default">
+        {% trans "Datasets" %}
+    </a>
+</li>
+<li>
+    <a id="maps" href="/maps" target="" class="nav-link btn btn-default">
+        {% trans "Maps" %}
+    </a>
+</li>
+<li>
+    <a id="documents" href="/documents" target="" class="nav-link btn btn-default">
+        {% trans "Documents" %}
+    </a>
+</li>
+{% if request.user.is_authenticated and perms.base.add_resourcebase %}
+<li>
+    <a id="upload-data" href="/catalogue/#/upload/dataset" target="" class="nav-link btn btn-default">
+        {% trans "Upload Data" %}
+    </a>
+</li>
+{% endif %}
+<li>
+    <a id="upload-guide" href="/upload-guide/" target="" class="nav-link btn btn-default">
+        {% trans "Data Guide" %}
+    </a>
+</li>

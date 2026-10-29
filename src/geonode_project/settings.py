@@ -19,6 +19,7 @@
 #########################################################################
 
 # Django settings for the GeoNode project.
+import ast
 import os
 
 # Load more settings from a file called local_settings.py if it exists
@@ -77,3 +78,49 @@ TEMPLATES[0].pop("APP_DIRS", None)
 PROJECT_FIXTURES = [
     # List project-related fixture files here, in the order they should be loaded.
 ]
+
+
+# ---------------------------------------------------------------------------
+# AVDP GIS Portal customisations
+# Keep project-specific settings below this line so upstream geonode-project
+# changes above remain easy to merge.
+# ---------------------------------------------------------------------------
+SITENAME = os.getenv("SITENAME", "AVDP GIS Portal")
+
+# Default view for new maps: Sierra Leone (EPSG:4326 centre, web-map zoom).
+DEFAULT_MAP_CENTER_X = ast.literal_eval(os.getenv("DEFAULT_MAP_CENTER_X", "-11.78"))
+DEFAULT_MAP_CENTER_Y = ast.literal_eval(os.getenv("DEFAULT_MAP_CENTER_Y", "8.56"))
+DEFAULT_MAP_CENTER = (DEFAULT_MAP_CENTER_X, DEFAULT_MAP_CENTER_Y)
+DEFAULT_MAP_ZOOM = int(os.getenv("DEFAULT_MAP_ZOOM", "7"))
+
+# Background layers offered in the map viewer. Only OpenStreetMap (ODbL,
+# attribution displayed by the map) and an empty background are enabled by
+# default. The OSM public tile servers are for light use only: production
+# deployments must use their own tile service or a licensed provider
+# (see docs/DEPLOYMENT.md). Heavier imagery backgrounds from upstream defaults
+# are deliberately not enabled.
+if GEONODE_CLIENT_LAYER_PREVIEW_LIBRARY == "mapstore":
+    MAPSTORE_BASELAYERS = [
+        {
+            "type": "osm",
+            "title": "OpenStreetMap",
+            "name": "mapnik",
+            "source": "osm",
+            "group": "background",
+            "visibility": True,
+        },
+        {
+            "source": "ol",
+            "group": "background",
+            "id": "none",
+            "name": "empty",
+            "title": "Empty Background",
+            "type": "empty",
+            "visibility": False,
+            "args": ["Empty Background", {"visibility": False}],
+        },
+    ]
+
+# Marker used to identify demonstration content created by `avdp_import_demo`.
+AVDP_DEMO_KEYWORD = "avdp-synthetic-demo"
+AVDP_SYNTHETIC_NOTICE = "SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS."

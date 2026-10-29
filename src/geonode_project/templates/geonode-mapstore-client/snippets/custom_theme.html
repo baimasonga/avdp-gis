@@ -1,0 +1,65 @@
+{% extends 'geonode-mapstore-client/snippets/custom_theme.html' %}
+{% load static %}
+{% comment %}
+AVDP GIS Portal theme.
+Overrides MapStore/GeoNode CSS variables through the supported custom_theme
+hook. Colours were chosen for WCAG AA contrast against their text colour:
+  primary blue  #1d5a8e on white  ~7.1:1
+  green         #2e6b34 on white  ~6.4:1
+  dark blue     #0b3354 with white ~12.6:1
+Admin-entered "extra CSS" from GeoNode's theme admin is still applied (block extra_css).
+{% endcomment %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'avdp/css/avdp.css' %}">
+<style>
+    .msgapi .gn-theme {
+        --ms-main-color: #1b2a36;
+        --ms-main-bg: #ffffff;
+        --ms-main-border-color: #d5dde4;
+        --ms-main-variant-color: #1b2a36;
+        --ms-main-variant-bg: #f3f7f4;
+        --ms-main-hover-color: #0b3354;
+        --ms-main-hover-bg: #e7f0f8;
+        --ms-primary: #1d5a8e;
+        --ms-primary-contrast: #ffffff;
+        --ms-info: #1d5a8e;
+        --ms-success: #2e6b34;
+        --ms-success-contrast: #ffffff;
+        --ms-link-color: #1d5a8e;
+        --ms-link-hover-color: #0b3354;
+        --ms-focus-color: rgba(29, 90, 142, 0.45);
+        --ms-footer-color: #ffffff;
+        --ms-footer-bg: #0b3354;
+        --ms-footer-link-color: #ffffff;
+        --ms-footer-link-hover-color: #cfe8d3;
+        --ms-jumbotron-color: #ffffff;
+        --ms-jumbotron-bg: #0b3354;
+        --ms-loader-primary-color: #1d5a8e;
+        --ms-loader-primary-fade-color: rgba(29, 90, 142, 0.2);
+        --ms-button-primary-color: #ffffff;
+        --ms-button-primary-bg: #1d5a8e;
+        --ms-button-primary-border-color: #1d5a8e;
+        --ms-button-primary-focus-color: #ffffff;
+        --ms-button-primary-focus-bg: #164672;
+        --ms-button-primary-focus-border-color: #0b3354;
+        --ms-button-primary-hover-color: #ffffff;
+        --ms-button-primary-hover-bg: #164672;
+        --ms-button-primary-hover-border-color: #164672;
+        --ms-button-primary-active-color: #ffffff;
+        --ms-button-primary-active-bg: #164672;
+        --ms-button-primary-active-border-color: #164672;
+        --ms-button-primary-active-hover-color: #ffffff;
+        --ms-button-primary-active-hover-bg: #0b3354;
+        --ms-button-primary-active-hover-border-color: #0b3354;
+        --ms-button-success-color: #ffffff;
+        --ms-button-success-bg: #2e6b34;
+        --ms-button-success-border-color: #2e6b34;
+        --ms-button-success-hover-color: #ffffff;
+        --ms-button-success-hover-bg: #23542a;
+        --ms-button-success-hover-border-color: #23542a;
+        --ms-button-success-focus-color: #ffffff;
+        --ms-button-success-focus-bg: #23542a;
+        --ms-button-success-focus-border-color: #173a1c;
+    }
+</style>
+{% endblock %}

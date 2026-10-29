@@ -6,4 +6,50 @@
         return localConfig;
     };
 </script>
+<script>
+    // AVDP: show a persistent notice in the viewer when the open map, dataset or
+    // document is synthetic demonstration content. The marker keyword is read
+    // from the resource's own metadata through the GeoNode API, so the notice
+    // follows the catalogue record rather than a hard-coded list.
+    (function () {
+        var MARKER = 'avdp-synthetic-demo';
+        var NOTICE = 'SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS.';
+        var DETAIL = 'Invented locations and figures for testing only. District labels are illustrative; do not sum beneficiary counts across layers.';
+        var cache = {};
+
+        function banner() {
+            var el = document.getElementById('avdp-synthetic-banner');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'avdp-synthetic-banner';
+                el.setAttribute('role', 'status');
+                el.className = 'avdp-synthetic-banner';
+                el.innerHTML = '<strong></strong> <span></span> <a href="/upload-guide/#demo-data">Details</a>';
+                el.querySelector('strong').textContent = NOTICE;
+                el.querySelector('span').textContent = DETAIL;
+                document.body.appendChild(el);
+            }
+            return el;
+        }
+
+        function update() {
+            var match = /#\/(map|dataset|document|geostory|dashboard)\/(\d+)/.exec(window.location.hash || '');
+            if (!match) { banner().style.display = 'none'; return; }
+            var pk = match[2];
+            var show = function (isDemo) { banner().style.display = isDemo ? 'block' : 'none'; };
+            if (pk in cache) { show(cache[pk]); return; }
+            fetch('/api/v2/resources/' + pk + '?include[]=keywords', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) {
+                    var keywords = (data && data.resource && data.resource.keywords) || [];
+                    cache[pk] = keywords.some(function (k) { return k && (k.slug === MARKER || k.name === MARKER); });
+                    show(cache[pk]);
+                })
+                .catch(function () { show(false); });
+        }
+
+        window.addEventListener('hashchange', update);
+        window.addEventListener('DOMContentLoaded', update);
+    })();
+</script>
 {% endblock %}

@@ -53,6 +53,10 @@ else
     invoke statics
     invoke loadthesauri
 
+    # AVDP: idempotent portal configuration (thesauri facets, role groups).
+    # Demonstration data is NOT loaded here; see docs/DATA_IMPORT.md.
+    python manage.py avdp_setup
+
     echo "Executing UWSGI server $cmd for Production"
 fi
 

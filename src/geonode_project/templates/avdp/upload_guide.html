@@ -1,0 +1,71 @@
+{% extends 'page.html' %}
+{% load i18n %}
+{% block page_class %}gn-homepage{% endblock %}
+{% block container %}
+<main class="avdp-page" id="main-content">
+    <h1>{% trans "Data guide" %}</h1>
+    <p>{% trans "How to prepare, upload, describe and share GIS data in the AVDP GIS Portal." %}</p>
+
+    <div class="avdp-info" role="note">
+        {% blocktrans %}New uploads are <strong>private</strong>: only you and portal administrators can see them until you share them with people or groups, or make them public from the resource's <em>Share</em> settings.{% endblocktrans %}
+    </div>
+
+    <h2>{% trans "1. Prepare your data" %}</h2>
+    <div class="avdp-table-wrap">
+    <table class="avdp-table">
+        <caption class="sr-only">{% trans "Accepted formats" %}</caption>
+        <thead>
+            <tr><th scope="col">{% trans "Format" %}</th><th scope="col">{% trans "What to upload" %}</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>{% trans "Shapefile" %}</td><td>{% trans "The .shp, .shx and .dbf files together (and the .prj, which defines the coordinate system), or a single .zip containing them." %}</td></tr>
+            <tr><td>GeoPackage</td><td>{% trans "A .gpkg file. Each vector table becomes a dataset." %}</td></tr>
+            <tr><td>GeoJSON</td><td>{% trans "A .geojson or .json file. GeoJSON is defined in WGS 84 (EPSG:4326)." %}</td></tr>
+            <tr><td>KML / KMZ</td><td>{% trans "A .kml file or a .kmz archive." %}</td></tr>
+            <tr><td>CSV</td><td>{% trans "A .csv with point coordinates in columns named lat/lon or latitude/longitude, or a WKT geometry column." %}</td></tr>
+            <tr><td>GeoTIFF</td><td>{% trans "A .tif / .tiff raster with embedded georeferencing." %}</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <ul>
+        <li>{% trans "Use WGS 84 (EPSG:4326) where possible. Always include the coordinate system definition (.prj for shapefiles)." %}</li>
+        <li>{% trans "Use short file names with letters, numbers and underscores only, e.g. water_points_2026.shp." %}</li>
+        <li>{% trans "Check geometries are valid and attribute names are meaningful before uploading." %}</li>
+        <li>{% trans "Archives that contain absolute paths, '..' path segments, symbolic links or extreme compression ratios are rejected for security reasons." %}</li>
+    </ul>
+
+    <h2>{% trans "2. Upload" %}</h2>
+    <p>
+        {% if request.user.is_authenticated %}
+            {% blocktrans %}Go to <a href="/catalogue/#/upload/dataset">Upload Data</a>, drag in your files and start the upload. Processing continues in the background; the dataset appears under <a href="/catalogue/#/search/?f=dataset&amp;f=my_resources">your datasets</a> when it is ready.{% endblocktrans %}
+        {% else %}
+            {% blocktrans %}<a href="/account/login/?next=/upload-guide/">Sign in</a> with an editor account to upload. Accounts are created by portal administrators.{% endblocktrans %}
+        {% endif %}
+    </p>
+
+    <h2>{% trans "3. Describe the dataset (metadata)" %}</h2>
+    <p>{% trans "Open the dataset, choose Edit → Edit metadata, and complete at least:" %}</p>
+    <ul>
+        <li>{% trans "Title and abstract (what the data shows and why it was collected)." %}</li>
+        <li>{% trans "AVDP dataset category (crop production, farmer organizations, rural infrastructure, water infrastructure, storage facilities, agricultural input distribution, or demonstration and extension)." %}</li>
+        <li>{% trans "Data status: verified, provisional or synthetic demonstration." %}</li>
+        <li>{% trans "Data source / attribution, point of contact and owner." %}</li>
+        <li>{% trans "Geographic coverage (region), reference or collection date and maintenance (update) frequency." %}</li>
+        <li>{% trans "Licence and any access or use restrictions." %}</li>
+    </ul>
+    <p>{% trans "District names stored in attribute tables are labels supplied with the data. They are not a verified spatial assignment unless the metadata says the data was checked against official district boundaries." %}</p>
+
+    <h2>{% trans "4. Style and share" %}</h2>
+    <ul>
+        <li>{% trans "Edit → Edit style lets you change symbols and colours; the legend updates automatically." %}</li>
+        <li>{% trans "Share lets you grant view, download, edit or manage rights to individual users or groups (for example AVDP Viewers or AVDP Editors)." %}</li>
+        <li>{% trans "Only make a dataset public when its owner has approved it for public release." %}</li>
+    </ul>
+
+    <h2 id="demo-data">{% trans "Demonstration data" %}</h2>
+    <div class="avdp-notice" role="note">
+        <strong>{{ AVDP_SYNTHETIC_NOTICE|default:"SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS." }}</strong>
+        {% blocktrans %}Demonstration layers contain invented locations and figures. District labels are illustrative, farm polygons are schematic, roads do not follow real routes, and beneficiary counts must not be added across layers as unique people. There are no official district boundaries in the demonstration package.{% endblocktrans %}
+    </div>
+</main>
+{% endblock %}

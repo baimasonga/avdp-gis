@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns="http://www.w3.org/2004/02/skos/core#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <ConceptScheme rdf:about="https://avdp-gis.local/thesaurus/categories">
+    <dc:title xml:lang="en">AVDP dataset category</dc:title>
+    <dc:description>Thematic categories used to organise the AVDP GIS catalogue.</dc:description>
+    <dcterms:issued>2026-10-29T00:00:00</dcterms:issued>
+  </ConceptScheme>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/crop-production">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>crop-production</altLabel>
+    <prefLabel xml:lang="en">Crop production</prefLabel>
+    <definition xml:lang="en">Farm plots, cropped areas, yields and production records.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/farmer-organizations">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>farmer-organizations</altLabel>
+    <prefLabel xml:lang="en">Farmer organizations</prefLabel>
+    <definition xml:lang="en">Farmer groups, cooperatives and associations.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/rural-infrastructure">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>rural-infrastructure</altLabel>
+    <prefLabel xml:lang="en">Rural infrastructure</prefLabel>
+    <definition xml:lang="en">Feeder roads, bridges and other rural access infrastructure.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/water-infrastructure">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>water-infrastructure</altLabel>
+    <prefLabel xml:lang="en">Water infrastructure</prefLabel>
+    <definition xml:lang="en">Water points, irrigation and water supply assets.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/storage-facilities">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>storage-facilities</altLabel>
+    <prefLabel xml:lang="en">Storage facilities</prefLabel>
+    <definition xml:lang="en">Grain stores, warehouses and post-harvest facilities.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/input-distribution">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>input-distribution</altLabel>
+    <prefLabel xml:lang="en">Agricultural input distribution</prefLabel>
+    <definition xml:lang="en">Distribution sites for seed, fertiliser and other inputs.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/categories/demonstration-extension">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/categories"/>
+    <altLabel>demonstration-extension</altLabel>
+    <prefLabel xml:lang="en">Demonstration and extension</prefLabel>
+    <definition xml:lang="en">Demonstration plots and extension service activities.</definition>
+  </Concept>
+</rdf:RDF>

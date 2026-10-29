@@ -1,0 +1,229 @@
+/*
+ * AVDP GIS Portal - project styles.
+ * Loaded through the custom_theme.html hook on every client page.
+ * Only classes prefixed "avdp-" plus a few navbar tweaks are styled here so
+ * that upstream GeoNode/MapStore styles remain untouched.
+ */
+
+/* ---- Text brand (no official logo until approved assets are supplied) ---- */
+.avdp-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #0b3354;
+    font-weight: 700;
+    font-size: 1.15rem;
+    white-space: nowrap;
+}
+.avdp-brand:hover,
+.avdp-brand:focus {
+    color: #1d5a8e;
+    text-decoration: none;
+}
+.avdp-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2rem;
+    padding: 0 0.4rem;
+    border-radius: 0.4rem;
+    background: linear-gradient(135deg, #1d5a8e 0%, #1d5a8e 50%, #2e6b34 50%, #2e6b34 100%);
+    color: #ffffff;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+}
+.avdp-brand-sub {
+    font-weight: 400;
+    color: #4a5a66;
+}
+@media (max-width: 480px) {
+    .avdp-brand-sub { display: none; }
+}
+
+/* ---- Visible focus for keyboard users ---- */
+.gn-theme a:focus-visible,
+.gn-theme button:focus-visible,
+.avdp-page a:focus-visible {
+    outline: 3px solid #f2b705;
+    outline-offset: 2px;
+}
+
+/* ---- Hero ---- */
+.avdp-hero {
+    background: #0b3354;
+    background-image: linear-gradient(120deg, #0b3354 0%, #164672 60%, #2e6b34 100%);
+    color: #ffffff;
+    padding: 2.5rem 1rem 2rem 1rem;
+}
+.avdp-hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.avdp-hero h1 {
+    margin: 0 0 0.75rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+.avdp-hero p {
+    max-width: 760px;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    margin: 0;
+    color: #ffffff;
+}
+@media (max-width: 600px) {
+    .avdp-hero { padding: 1.5rem 1rem; }
+    .avdp-hero h1 { font-size: 1.5rem; }
+}
+
+/* ---- Page sections ---- */
+.avdp-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    color: #1b2a36;
+}
+.avdp-page h2 {
+    font-size: 1.35rem;
+    margin: 1.5rem 0 0.75rem 0;
+    color: #0b3354;
+}
+.avdp-page h3 {
+    font-size: 1.1rem;
+    margin: 1.25rem 0 0.5rem 0;
+    color: #0b3354;
+}
+.avdp-page p,
+.avdp-page li {
+    line-height: 1.55;
+}
+.avdp-page code {
+    color: #0b3354;
+    background: #eef3f7;
+}
+
+/* ---- Action cards ---- */
+.avdp-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    list-style: none;
+}
+.gn-theme a.avdp-action,
+.avdp-action {
+    display: block;
+    height: 100%;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid #d5dde4;
+    border-top: 4px solid #1d5a8e;
+    border-radius: 0.4rem;
+    background: #ffffff;
+    color: #1b2a36;
+    text-decoration: none;
+}
+.avdp-action.avdp-action-green {
+    border-top-color: #2e6b34;
+}
+.gn-theme a.avdp-action:hover,
+.gn-theme a.avdp-action:focus,
+.avdp-action:hover,
+.avdp-action:focus {
+    background: #f3f7fb;
+    color: #0b3354;
+    text-decoration: none;
+}
+.avdp-action-title {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1d5a8e;
+    margin-bottom: 0.35rem;
+}
+.avdp-action-green .avdp-action-title {
+    color: #2e6b34;
+}
+
+/* ---- Notices ---- */
+.avdp-notice {
+    border: 1px solid #b26a00;
+    border-left: 6px solid #b26a00;
+    background: #fff6df;
+    color: #3d2a00;
+    border-radius: 0.3rem;
+    padding: 0.85rem 1rem;
+    margin: 1rem 0;
+}
+.avdp-notice strong {
+    color: #3d2a00;
+}
+.avdp-info {
+    border: 1px solid #b9cfe3;
+    border-left: 6px solid #1d5a8e;
+    background: #f0f6fb;
+    color: #1b2a36;
+    border-radius: 0.3rem;
+    padding: 0.85rem 1rem;
+    margin: 1rem 0;
+}
+
+/* ---- Tables in guidance pages ---- */
+.avdp-table-wrap {
+    overflow-x: auto;
+}
+.avdp-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.5rem 0 1rem 0;
+}
+.avdp-table th,
+.avdp-table td {
+    border: 1px solid #d5dde4;
+    padding: 0.45rem 0.6rem;
+    text-align: left;
+    vertical-align: top;
+}
+.avdp-table th {
+    background: #eef3f7;
+    color: #0b3354;
+}
+
+/* ---- Footer ---- */
+.avdp-footer-note {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
+
+.avdp-page h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0.5rem 0 0.5rem 0;
+    color: #0b3354;
+}
+
+/* ---- Synthetic-data banner shown in map/dataset viewers ---- */
+.avdp-synthetic-banner {
+    display: none;
+    position: fixed;
+    left: 50%;
+    bottom: 4.5rem;
+    transform: translateX(-50%);
+    z-index: 2147483000;
+    max-width: min(92vw, 760px);
+    padding: 0.5rem 0.85rem;
+    border: 1px solid #b26a00;
+    border-left: 6px solid #b26a00;
+    border-radius: 0.3rem;
+    background: #fff6df;
+    color: #3d2a00;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.avdp-synthetic-banner a {
+    color: #0b3354;
+    text-decoration: underline;
+}

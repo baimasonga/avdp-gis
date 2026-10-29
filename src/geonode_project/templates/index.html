@@ -1,0 +1,59 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% comment %}
+AVDP homepage. Extends the geonode-mapstore-client index.html and only
+replaces the content block; the MapStore resource grids (featured + latest)
+are kept so the page stays driven by GeoNode's catalogue and permissions.
+{% endcomment %}
+
+{% block content %}
+<div class="gn-container">
+    <div class="avdp-page">
+        <h2 id="avdp-start">{% trans "Start here" %}</h2>
+        <ul class="avdp-actions" aria-labelledby="avdp-start">
+            <li>
+                <a class="avdp-action" href="/datasets">
+                    <span class="avdp-action-title">{% trans "Explore Datasets" %}</span>
+                    {% trans "Search the catalogue by keyword, category, date or area, then preview a dataset on a map, inspect its attributes and read its metadata." %}
+                </a>
+            </li>
+            <li>
+                <a class="avdp-action avdp-action-green" href="/maps">
+                    <span class="avdp-action-title">{% trans "Explore Maps" %}</span>
+                    {% trans "Open saved maps that combine several layers, with a legend, layer visibility controls and feature information." %}
+                </a>
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a class="avdp-action" href="/catalogue/#/upload/dataset">
+                    <span class="avdp-action-title">{% trans "Upload Data" %}</span>
+                    {% trans "Add a shapefile, GeoPackage, GeoJSON, KML or CSV. New uploads stay private to you until you share or publish them." %}
+                </a>
+                {% else %}
+                <a class="avdp-action" href="/account/login/?next=/catalogue/%23/upload/dataset">
+                    <span class="avdp-action-title">{% trans "Upload Data" %}</span>
+                    {% trans "Sign in with an editor account to upload data. Accounts are created by portal administrators." %}
+                </a>
+                {% endif %}
+            </li>
+        </ul>
+        <p>
+            <a href="/upload-guide/">{% trans "Read the data guide" %}</a>
+            {% trans "for accepted formats, coordinate reference systems, required metadata and how sharing works." %}
+        </p>
+
+        <div class="avdp-notice" role="note">
+            <strong>{% trans "About demonstration content:" %}</strong>
+            {% blocktrans %}Datasets and maps labelled “SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS” contain invented locations and figures used to test the portal. Do not use them for planning, reporting or decision-making.{% endblocktrans %}
+        </div>
+
+        {% if not request.user.is_authenticated %}
+        <div class="avdp-info" role="note">
+            {% blocktrans %}You are browsing as a visitor, so you only see resources that have been made public. If a list below is empty, no public resources are available yet — sign in to see data shared with you.{% endblocktrans %}
+        </div>
+        {% endif %}
+    </div>
+    <div id="gn-home-featured-resources-grid"></div>
+    <div id="gn-home-resources-grid"></div>
+</div>
+{% endblock %}

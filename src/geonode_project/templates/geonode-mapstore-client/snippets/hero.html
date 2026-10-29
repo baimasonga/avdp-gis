@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}
+AVDP hero. GeoNode's theme admin (jumbotron title/content) can still override
+the text, so wording can be changed without a code release.
+{% endcomment %}
+<section id="gn-hero" class="avdp-hero" aria-labelledby="avdp-hero-title">
+    <div class="avdp-hero-inner">
+        {% with title=custom_theme.jumbotron_welcome_title|default:"" content=custom_theme.jumbotron_welcome_content|default:"" %}
+        <h1 id="avdp-hero-title">{% if title %}{{ title }}{% else %}{% trans "AVDP GIS Portal" %}{% endif %}</h1>
+        <p>
+            {% if content %}{{ content }}{% else %}
+            {% blocktrans %}A shared catalogue and map viewer for agricultural and rural infrastructure information in Sierra Leone. Find datasets, view them together on interactive maps, inspect feature attributes and download data you are authorised to use.{% endblocktrans %}
+            {% endif %}
+        </p>
+        {% endwith %}
+    </div>
+</section>

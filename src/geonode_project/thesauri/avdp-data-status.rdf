@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns="http://www.w3.org/2004/02/skos/core#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <ConceptScheme rdf:about="https://avdp-gis.local/thesaurus/data-status">
+    <dc:title xml:lang="en">AVDP data status</dc:title>
+    <dc:description>Whether a dataset is verified, provisional or synthetic demonstration content.</dc:description>
+    <dcterms:issued>2026-10-29T00:00:00</dcterms:issued>
+  </ConceptScheme>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/data-status/verified">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/data-status"/>
+    <altLabel>verified</altLabel>
+    <prefLabel xml:lang="en">Verified</prefLabel>
+    <definition xml:lang="en">Checked by the data owner and approved as an authoritative record.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/data-status/provisional">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/data-status"/>
+    <altLabel>provisional</altLabel>
+    <prefLabel xml:lang="en">Provisional</prefLabel>
+    <definition xml:lang="en">Real data that has not yet completed verification.</definition>
+  </Concept>
+  <Concept rdf:about="https://avdp-gis.local/thesaurus/data-status/synthetic-demonstration">
+    <inScheme rdf:resource="https://avdp-gis.local/thesaurus/data-status"/>
+    <altLabel>synthetic-demonstration</altLabel>
+    <prefLabel xml:lang="en">Synthetic demonstration</prefLabel>
+    <definition xml:lang="en">Invented data for testing and training only. Not official AVDP records.</definition>
+  </Concept>
+</rdf:RDF>

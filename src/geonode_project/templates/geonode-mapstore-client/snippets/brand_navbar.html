@@ -1,0 +1,17 @@
+{% extends 'geonode-mapstore-client/snippets/brand_navbar.html' %}
+{% load i18n %}
+{% comment %}
+AVDP: text brand instead of the GeoNode logo. An uploaded logo in GeoNode's
+theme admin (custom_theme.logo) still takes precedence, so approved assets
+can be added later without code changes.
+{% endcomment %}
+{% block logo %}
+    {% if custom_theme.logo and custom_theme.logo.url %}
+        <a href="/"><img src="{{ custom_theme.logo.url }}" alt="{% trans 'AVDP GIS Portal home' %}"></a>
+    {% else %}
+        <a href="/" class="avdp-brand" aria-label="{% trans 'AVDP GIS Portal home' %}">
+            <span class="avdp-brand-mark" aria-hidden="true">AVDP</span>
+            <span>{% trans "AVDP" %} <span class="avdp-brand-sub">{% trans "GIS Portal" %}</span></span>
+        </a>
+    {% endif %}
+{% endblock %}
