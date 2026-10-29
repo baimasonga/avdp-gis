@@ -1,0 +1,31 @@
+// AVDP GIS Portal — temporary demo in GitHub Codespaces.
+// Choose this configuration when creating a codespace ("AVDP GIS Portal demo")
+// and a 4-core / 16 GB machine. See docs/CODESPACES.md.
+{
+    "name": "AVDP GIS Portal demo",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/python:1": {}
+    },
+    "hostRequirements": {
+        "cpus": 4,
+        "memory": "16gb",
+        "storage": "32gb"
+    },
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    // First creation: configure, build, start and load demo data.
+    "postCreateCommand": "bash scripts/codespace-demo.sh all",
+    // Resuming a stopped codespace: start the containers again.
+    "postStartCommand": "docker compose up -d && bash scripts/codespace-demo.sh info",
+    "forwardPorts": [80],
+    "portsAttributes": {
+        "80": {
+            "label": "AVDP GIS Portal",
+            "onAutoForward": "notify"
+        }
+    },
+    "otherPortsAttributes": {
+        "onAutoForward": "ignore"
+    }
+}

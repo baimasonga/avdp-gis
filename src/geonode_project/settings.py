@@ -21,6 +21,7 @@
 # Django settings for the GeoNode project.
 import ast
 import os
+from urllib.parse import urlparse
 
 # Load more settings from a file called local_settings.py if it exists
 try:
@@ -146,6 +147,18 @@ if AVDP_BASEMAP_URL:
         "class": "geonode.thumbs.background.GenericXYZBackground",
         "options": {"url": AVDP_BASEMAP_URL.replace("{s}", "a"), "tile_size": 256},
     }
+
+# When HTTPS is terminated by a proxy in front of nginx (GitHub Codespaces,
+# a load balancer, Cloudflare), Django sees plain HTTP while browsers send an
+# https:// Origin. Trust the portal's own public HTTPS origin so sign-in and
+# other POSTs pass Django's CSRF origin check. Extra origins can be added with
+# AVDP_CSRF_TRUSTED_ORIGINS (comma-separated, scheme included).
+_public = urlparse(SITEURL)
+CSRF_TRUSTED_ORIGINS = list(globals().get("CSRF_TRUSTED_ORIGINS", []))
+if _public.scheme == "https" and _public.netloc:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{_public.netloc}")
+CSRF_TRUSTED_ORIGINS += [o.strip() for o in os.getenv("AVDP_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
+CSRF_TRUSTED_ORIGINS = sorted(set(CSRF_TRUSTED_ORIGINS))
 
 # Marker used to identify demonstration content created by `avdp_import_demo`.
 AVDP_DEMO_KEYWORD = "avdp-synthetic-demo"
