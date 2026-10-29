@@ -17,7 +17,10 @@ What the first version provides:
 - A searchable catalogue with AVDP **dataset category** and **data status**
   facets, ISO metadata, regions, licences and update frequency.
 - Interactive maps (MapStore) with multiple layers, legends, layer visibility,
-  feature inspection and saved, shareable maps.
+  feature inspection and saved, shareable maps; purpose-built cartography
+  (icon symbols, status colours, scale-dependent labels, formatted popups).
+- A custom design system (IBM Plex Sans, forest/navy/paper palette) across the
+  homepage, catalogue and map viewer.
 - GeoNode's native permissions: new uploads are private until deliberately
   shared or made public. Role groups `avdp-viewers` and `avdp-editors`.
 - An explicit, repeatable import command for the synthetic demonstration

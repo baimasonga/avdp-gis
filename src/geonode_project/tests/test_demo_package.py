@@ -138,9 +138,21 @@ class ValidationTests(unittest.TestCase):
 
 
 class StyleTests(unittest.TestCase):
-    def test_categorised_sld_is_well_formed(self):
+    NS = {"sld": "http://www.opengis.net/sld"}
+
+    def _rules(self, sld):
         from xml.etree import ElementTree
 
+        root = ElementTree.fromstring(sld)
+        out = []
+        for rule in root.iter("{http://www.opengis.net/sld}Rule"):
+            inclusion = rule.find("sld:VendorOption[@name='inclusion']", self.NS)
+            out.append(
+                (rule.findtext("sld:Title", namespaces=self.NS), inclusion.text if inclusion is not None else None)
+            )
+        return out
+
+    def test_legend_has_one_entry_per_class(self):
         sld = styles.build_sld(
             "water_points",
             "avdp_demo_water_points",
@@ -148,14 +160,46 @@ class StyleTests(unittest.TestCase):
             ["point"],
             "status",
             ["Functional", "Needs <repair>"],
+            label_field="name",
         )
-        root = ElementTree.fromstring(sld)
-        rules = root.findall(".//{http://www.opengis.net/sld}Rule")
-        self.assertEqual(len(rules), 3)  # two categories + "other"
+        rules = self._rules(sld)
+        legend = [t for t, inc in rules if inc == "legendOnly"]
+        self.assertEqual(legend, ["Functional", "Needs <repair>", "Other / not recorded"])
+        # every other rule is map-only (scale bands and labels), so the legend stays clean
+        self.assertTrue(all(inc in ("legendOnly", "mapOnly") for _, inc in rules))
+        self.assertIn("avdp_icons/water.svg?fill=%23", sld)
 
-    def test_single_rule_without_field(self):
-        sld = styles.build_sld("feeder_roads", "r", "Roads", ["line"])
-        self.assertIn("LineSymbolizer", sld)
+    def test_status_colours_are_semantic(self):
+        self.assertEqual(styles.status_colour("Not functional"), styles.STATUS_BAD)
+        self.assertEqual(styles.status_colour("Needs repair"), styles.STATUS_WARN)
+        self.assertEqual(styles.status_colour("Functional"), styles.STATUS_GOOD)
+        self.assertEqual(styles.status_colour("Poor"), styles.STATUS_BAD)
+        self.assertIsNone(styles.status_colour("Cooperative"))
+
+    def test_category_palette_avoids_status_hues(self):
+        status = {styles.STATUS_GOOD, styles.STATUS_WARN, styles.STATUS_BAD}
+        self.assertFalse(status & set(styles.CATEGORY_PALETTE))
+
+    def test_roads_are_cased_and_poor_is_dashed(self):
+        sld = styles.build_sld("feeder_roads", "r", "Roads", ["line"], "condition", ["Good", "Poor"])
+        self.assertIn("stroke-dasharray", sld)
+        self.assertGreater(sld.count("<LineSymbolizer>"), 4)
+
+    def test_small_polygons_get_overview_markers(self):
+        sld = styles.build_sld("farm_plots", "f", "Farm plots", ["polygon"], "crop", ["Rice"])
+        self.assertIn('name="centroid"', sld)
+        self.assertIn(styles.CROP_COLOURS["rice"], sld)
+
+
+class FeatureInfoTests(unittest.TestCase):
+    def test_template_labels_and_hides_geometry(self):
+        from geonode_project.avdp.feature_info import build_template
+
+        html = build_template("Water points", ["fid", "geom", "name", "status", "dist_label"], synthetic=True)
+        self.assertIn("${properties.name}", html)
+        self.assertIn("District (label, unverified)", html)
+        self.assertNotIn("properties.geom", html)
+        self.assertIn("Synthetic demo", html)
 
 
 if __name__ == "__main__":

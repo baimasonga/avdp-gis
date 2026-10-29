@@ -42,6 +42,32 @@ pipeline was verified with a generated test fixture of the same shape.
 - **Docs** — README, docs/ARCHITECTURE.md, DEVELOPMENT.md, DATA_IMPORT.md,
   DEPLOYMENT.md, this file.
 
+## Iteration 2 — visual design and cartography
+
+Feedback: the first version still looked like default GeoNode, including the
+map symbology. Changes:
+
+- **Design system** (docs/ARCHITECTURE.md → *Design system*): self-hosted IBM
+  Plex Sans, forest/navy/paper/ochre tokens applied to every MapStore variable
+  (buttons, tools, panels, loaders), new header with a generic map-pin mark,
+  compact navy footer, restyled catalogue cards, page titles, data guide and
+  viewer chrome.
+- **Homepage** rebuilt: hero with featured-map preview, live per-visitor
+  counts, seven theme tiles with live counts and working deep links into the
+  filtered catalogue, three-step contribution guide, synthetic-data notice.
+- **Cartography** (docs/ARCHITECTURE.md → *Cartography*): parametric SVG badge
+  icons per point theme, semantic status colours shared across layers, a
+  category palette that avoids status hues, crop colours, cased roads with
+  dashed "poor" sections, hatched demonstration plots, three scale bands with
+  centroid markers at national scale and labels at local scale, one legend
+  entry per class, formatted feature popups with readable labels and an
+  "unverified" marker on district labels.
+- **Basemap**: OSM default; licensed muted basemap configurable through
+  `AVDP_BASEMAP_URL`. CARTO's keyless URLs were tried and rejected because
+  they render an "API KEY REQUIRED" watermark.
+- Fixed while verifying: catalogue deep links (`/all#/?…`) and the data
+  guide's "your datasets" link used a route that renders a blank page.
+
 ## Verification performed (local Docker, this session)
 
 | # | Check | Result |
@@ -58,7 +84,7 @@ pipeline was verified with a generated test fixture of the same shape.
 | 10 | Upload protections | **Passed** — anonymous/outsider/viewer uploads refused; traversal zip, zip bomb, disguised executable, `.exe`, malformed GeoJSON, lone `.shp` rejected; `../` filename did not escape; size limits configured (1 GB) |
 | 11 | Persistence across restart | **Passed** — data, map, accounts and permissions intact after `docker compose down` / `up` |
 | 12 | Re-run without duplication | **Passed** — repeated imports reuse marked datasets; 7 datasets / 1 map remain |
-| 13 | Desktop and mobile layouts | **Passed (visual)** — home, datasets, maps, guide, catalogue, map viewer at 1366 px and 390 px; no horizontal overflow; mobile banner adjusted to keep attribution and controls visible |
+| 13 | Desktop and mobile layouts | **Passed (visual)** — redesigned home (visitor and signed-in), datasets, guide, upload page, map viewer with legend and popup, at 1366 px and 390 px; no horizontal overflow; theme tiles open the correctly filtered catalogue; banner and footer keep map controls and attribution visible |
 | 14 | Logs | **Passed** — no errors in container logs except those caused by the deliberate hostile uploads |
 | 15 | Backup | **Partly** — `pg_dump` of both DBs succeeded; vector DB restored to a scratch DB with correct counts. Volume archives and full restore into a fresh stack **not tested**. |
 
@@ -75,8 +101,8 @@ environment, not a deliverable data set.
    `src/geonode_project/avdp/demo_package.py`.
 2. **Production deployment not attempted** — HTTPS/Let's Encrypt, SMTP,
    public DNS, firewall and off-site backups need a staging server.
-3. **Basemap licensing** — public OSM tiles are for light use only; choose a
-   production tile source.
+3. **Basemap licensing** — public OSM tiles are for light use only. Obtain a
+   licensed (ideally muted) basemap and set `AVDP_BASEMAP_URL`.
 4. **Official logos/branding** — text branding only until approved assets are
    supplied (upload via *Admin → Themes* without code changes).
 

@@ -77,14 +77,25 @@ proxy / load balancer and forward to the nginx container; then keep
 
 ## Basemaps
 
-Only OpenStreetMap and an empty background are enabled. The public OSM tile
-servers (`tile.openstreetmap.org`) are run by volunteers for light use under
-the [OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/)
-(no bulk downloading, no offline caching, attribution required). For a
-production portal use a self-hosted tile server or a commercial provider whose
-terms cover the expected traffic, and change `MAPSTORE_BASELAYERS` in
-`src/geonode_project/settings.py`. Server-side thumbnail generation also
-fetches tiles.
+The viewer offers OpenStreetMap (default) and an empty background. The public
+OSM tile servers (`tile.openstreetmap.org`) are run by volunteers for light use
+under the [OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/)
+(no bulk downloading or offline caching, attribution required). Server-side
+thumbnail generation also fetches tiles.
+
+For production, and for a muted cartographic background that lets the
+thematic layers stand out, use a provider you are licensed for (or your own
+tile server) and set in `.env`:
+
+```
+AVDP_BASEMAP_URL=https://<provider>/<style>/{z}/{x}/{y}.png?key=<your key>
+AVDP_BASEMAP_TITLE="Light basemap"
+AVDP_BASEMAP_ATTRIBUTION="© <provider> © OpenStreetMap contributors"
+```
+
+It then becomes the default background in new and re-imported maps and in
+thumbnails. Note: CARTO's public basemap URLs answer without a key but now
+draw an "API KEY REQUIRED" watermark, so they cannot be used keyless.
 
 ## Storage
 

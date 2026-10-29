@@ -37,7 +37,7 @@
     <h2>{% trans "2. Upload" %}</h2>
     <p>
         {% if request.user.is_authenticated %}
-            {% blocktrans %}Go to <a href="/catalogue/#/upload/dataset">Upload Data</a>, drag in your files and start the upload. Processing continues in the background; the dataset appears under <a href="/catalogue/#/search/?f=dataset&amp;f=my_resources">your datasets</a> when it is ready.{% endblocktrans %}
+            {% blocktrans %}Go to <a href="/catalogue/#/upload/dataset">Upload Data</a>, drag in your files and start the upload. Processing continues in the background; the dataset appears under <a href="/datasets#/?f=dataset&amp;f=my-resources">your datasets</a> when it is ready.{% endblocktrans %}
         {% else %}
             {% blocktrans %}<a href="/account/login/?next=/upload-guide/">Sign in</a> with an editor account to upload. Accounts are created by portal administrators.{% endblocktrans %}
         {% endif %}

@@ -29,8 +29,14 @@ def _layer(spec, dataset, ows_url):
         "style": dataset.default_style.name if dataset.default_style else "",
         "search": {"type": "wfs", "url": ows_url},
         "bbox": {"crs": "EPSG:4326", "bounds": {"minx": x0, "miny": y0, "maxx": x1, "maxy": y1}},
-        # Show identify results as an attribute table rather than plain text.
-        "featureInfo": {"format": "PROPERTIES"},
+        # Formatted identify popup (falls back to an attribute table).
+        "featureInfo": (
+            {"format": "TEMPLATE", "template": dataset.featureinfo_custom_template}
+            if dataset.use_featureinfo_custom_template and dataset.featureinfo_custom_template
+            else {"format": "PROPERTIES"}
+        ),
+        # Larger legend glyphs so the map icons stay legible in the layer list.
+        "legendOptions": {"legendWidth": 20, "legendHeight": 20},
         "extendedParams": {"pk": str(dataset.pk)},
         "group": "Default",
     }

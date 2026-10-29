@@ -1,17 +1,26 @@
 {% extends 'geonode-mapstore-client/snippets/brand_navbar.html' %}
 {% load i18n %}
 {% comment %}
-AVDP: text brand instead of the GeoNode logo. An uploaded logo in GeoNode's
-theme admin (custom_theme.logo) still takes precedence, so approved assets
-can be added later without code changes.
+AVDP text brand with a generic contour/pin mark (not an official logo). An
+uploaded logo in GeoNode's theme admin (custom_theme.logo) takes precedence,
+so approved assets can be added later without code changes.
 {% endcomment %}
 {% block logo %}
     {% if custom_theme.logo and custom_theme.logo.url %}
         <a href="/"><img src="{{ custom_theme.logo.url }}" alt="{% trans 'AVDP GIS Portal home' %}"></a>
     {% else %}
         <a href="/" class="avdp-brand" aria-label="{% trans 'AVDP GIS Portal home' %}">
-            <span class="avdp-brand-mark" aria-hidden="true">AVDP</span>
-            <span>{% trans "AVDP" %} <span class="avdp-brand-sub">{% trans "GIS Portal" %}</span></span>
+            <svg class="avdp-brand-mark" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
+                <rect width="34" height="34" rx="8" fill="#1f5d3a"/>
+                <path d="M6 23c3-3 6-3.5 9-2s6 1.5 9-1.5 4-3 4-3" fill="none" stroke="#ffffff" stroke-opacity=".45" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M6 27.5c3.5-3 7-3 10-1.6s6.5 1.4 12-2.4" fill="none" stroke="#ffffff" stroke-opacity=".3" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M17 6.5a5.6 5.6 0 0 0-5.6 5.6c0 4.2 5.6 9.4 5.6 9.4s5.6-5.2 5.6-9.4A5.6 5.6 0 0 0 17 6.5z" fill="#ffffff"/>
+                <circle cx="17" cy="12.1" r="2.2" fill="#c98a1b"/>
+            </svg>
+            <span class="avdp-brand-text">
+                <span class="avdp-brand-name">AVDP</span>
+                <span class="avdp-brand-sub">{% trans "GIS Portal" %}</span>
+            </span>
         </a>
     {% endif %}
 {% endblock %}

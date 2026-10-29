@@ -93,21 +93,40 @@ DEFAULT_MAP_CENTER_Y = ast.literal_eval(os.getenv("DEFAULT_MAP_CENTER_Y", "8.56"
 DEFAULT_MAP_CENTER = (DEFAULT_MAP_CENTER_X, DEFAULT_MAP_CENTER_Y)
 DEFAULT_MAP_ZOOM = int(os.getenv("DEFAULT_MAP_ZOOM", "7"))
 
-# Background layers offered in the map viewer. Only OpenStreetMap (ODbL,
-# attribution displayed by the map) and an empty background are enabled by
-# default. The OSM public tile servers are for light use only: production
-# deployments must use their own tile service or a licensed provider
-# (see docs/DEPLOYMENT.md). Heavier imagery backgrounds from upstream defaults
-# are deliberately not enabled.
+# Background layers offered in the map viewer.
+# Default: OpenStreetMap (no key; attribution shown; light use only under the
+# OSM tile usage policy). For a muted cartographic basemap, set
+# AVDP_BASEMAP_URL to an XYZ template from a provider you are licensed to use
+# (e.g. a CARTO or MapTiler URL including your key, or your own tile server)
+# and AVDP_BASEMAP_ATTRIBUTION to its required attribution; it then becomes
+# the default background and the thumbnail background. See docs/DEPLOYMENT.md.
+AVDP_BASEMAP_URL = os.getenv("AVDP_BASEMAP_URL", "").strip()
+AVDP_BASEMAP_TITLE = os.getenv("AVDP_BASEMAP_TITLE", "Light basemap")
+AVDP_BASEMAP_ATTRIBUTION = os.getenv("AVDP_BASEMAP_ATTRIBUTION", "")
 if GEONODE_CLIENT_LAYER_PREVIEW_LIBRARY == "mapstore":
-    MAPSTORE_BASELAYERS = [
+    MAPSTORE_BASELAYERS = []
+    if AVDP_BASEMAP_URL:
+        MAPSTORE_BASELAYERS.append(
+            {
+                "type": "tileprovider",
+                "provider": "custom",
+                "title": AVDP_BASEMAP_TITLE,
+                "name": "avdp-basemap",
+                "id": "avdp-basemap",
+                "url": AVDP_BASEMAP_URL,
+                "options": {"attribution": AVDP_BASEMAP_ATTRIBUTION, "maxZoom": 19},
+                "group": "background",
+                "visibility": True,
+            }
+        )
+    MAPSTORE_BASELAYERS += [
         {
             "type": "osm",
             "title": "OpenStreetMap",
             "name": "mapnik",
             "source": "osm",
             "group": "background",
-            "visibility": True,
+            "visibility": not AVDP_BASEMAP_URL,
         },
         {
             "source": "ol",
@@ -120,6 +139,13 @@ if GEONODE_CLIENT_LAYER_PREVIEW_LIBRARY == "mapstore":
             "args": ["Empty Background", {"visibility": False}],
         },
     ]
+
+# Thumbnails use the same background as the viewer for a consistent catalogue.
+if AVDP_BASEMAP_URL:
+    THUMBNAIL_BACKGROUND = {
+        "class": "geonode.thumbs.background.GenericXYZBackground",
+        "options": {"url": AVDP_BASEMAP_URL.replace("{s}", "a"), "tile_size": 256},
+    }
 
 # Marker used to identify demonstration content created by `avdp_import_demo`.
 AVDP_DEMO_KEYWORD = "avdp-synthetic-demo"

@@ -45,6 +45,8 @@ from geonode.upload.models import ResourceHandlerInfo
 
 from geonode_project.avdp import demo_package as dp
 from geonode_project.avdp import styles
+from geonode_project.avdp.feature_info import build_template
+from geonode_project.avdp.map_icons import publish_icons
 from geonode_project.avdp.demo_map import MAP_MARKER, MAP_TITLE, build_map_payload
 
 CATEGORY_THESAURUS_TITLE = "AVDP dataset category"
@@ -142,6 +144,8 @@ class Command(BaseCommand):
             for spec in dp.LAYERS:
                 datasets[spec.key] = self._import_layer(spec, found[spec.key], work)
 
+            # Icons referenced by the AVDP styles must exist in GeoServer first.
+            self.stdout.write(f"Published map icons: {', '.join(publish_icons())}")
             for spec in dp.LAYERS:
                 self._finalise_dataset(spec, datasets[spec.key], found[spec.key])
 
@@ -159,6 +163,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(msg))
 
             if not opts["skip_map"]:
+                # Reload so the map sees the metadata/style/template just applied.
+                datasets = {k: Dataset.objects.get(pk=d.pk) for k, d in datasets.items()}
                 self._ensure_map(datasets)
         finally:
             shutil.rmtree(work, ignore_errors=True)
@@ -283,6 +289,11 @@ class Command(BaseCommand):
             "license": License.objects.filter(identifier="not_specified").first(),
             "restriction_code_type": RestrictionCodeType.objects.filter(identifier="otherRestrictions").first(),
             "maintenance_frequency": "notPlanned",
+            # Formatted identify popup, used by the dataset viewer and by maps.
+            "use_featureinfo_custom_template": True,
+            "featureinfo_custom_template": build_template(
+                spec.title, [a.attribute for a in dataset.attributes.all()], synthetic=True
+            ),
         }
         vals = {k: v for k, v in vals.items() if v is not None}
         keywords = [
@@ -307,7 +318,13 @@ class Command(BaseCommand):
         values = dp.distinct_values(source)
         field = dp.style_field(spec, report.fields, values)
         sld = styles.build_sld(
-            spec.key, dataset.name, spec.title, report.geometry_families, field, values.get(field, ()) if field else ()
+            spec.key,
+            dataset.name,
+            spec.title,
+            report.geometry_families,
+            field,
+            values.get(field, ()) if field else (),
+            label_field=styles.label_field_for(report.fields),
         )
         sld_path = os.path.join(tempfile.mkdtemp(prefix="avdp_sld_"), f"{dataset.name}.sld")
         with open(sld_path, "w") as handle:

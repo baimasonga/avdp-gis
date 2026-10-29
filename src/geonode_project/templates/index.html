@@ -1,59 +1,197 @@
 {% extends 'index.html' %}
-{% load i18n %}
+{% load i18n avdp_tags %}
 {% comment %}
-AVDP homepage. Extends the geonode-mapstore-client index.html and only
-replaces the content block; the MapStore resource grids (featured + latest)
-are kept so the page stays driven by GeoNode's catalogue and permissions.
+AVDP homepage. Extends the geonode-mapstore-client index.html: the header is
+kept (without the default hero), the content block is replaced, and the
+MapStore resource grids (featured + latest) are kept so the page stays driven
+by GeoNode's catalogue and permissions. All numbers and the featured map are
+read from GeoNode's API in the visitor's own session.
 {% endcomment %}
 
+{% block header %}
+    {% include './geonode-mapstore-client/snippets/header.html' %}
+{% endblock %}
+
 {% block content %}
-<div class="gn-container">
-    <div class="avdp-page">
-        <h2 id="avdp-start">{% trans "Start here" %}</h2>
-        <ul class="avdp-actions" aria-labelledby="avdp-start">
-            <li>
-                <a class="avdp-action" href="/datasets">
-                    <span class="avdp-action-title">{% trans "Explore Datasets" %}</span>
-                    {% trans "Search the catalogue by keyword, category, date or area, then preview a dataset on a map, inspect its attributes and read its metadata." %}
+{% avdp_themes as themes %}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+        <symbol id="avdp-i-crop-production" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V8"/><path d="M12 12c-3 0-5-2-5-5 3 0 5 2 5 5z"/><path d="M12 10c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 17c-3 0-5-2-5-5 3 0 5 2 5 5z"/><path d="M12 15c0-3 2-5 5-5 0 3-2 5-5 5z"/></g></symbol>
+        <symbol id="avdp-i-farmer-organizations" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><path d="M15 14.8c3 0 5.5 1.8 5.5 5.2"/></g></symbol>
+        <symbol id="avdp-i-rural-infrastructure" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21 10.5 3"/><path d="M16 21 13.5 3"/><path d="M12 6.5v1.8"/><path d="M12 11.2v1.8"/><path d="M12 16v1.8"/></g></symbol>
+        <symbol id="avdp-i-water-infrastructure" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s-6 6.8-6 11a6 6 0 0 0 12 0c0-4.2-6-11-6-11z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/></g></symbol>
+        <symbol id="avdp-i-storage-facilities" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5V20H3z"/><path d="M8 20v-6h8v6"/><path d="M8 17h8"/></g></symbol>
+        <symbol id="avdp-i-input-distribution" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1.4 3c4 1.6 5.6 5.6 4.6 9-.6 2.3-2.8 3.5-6.2 3.5s-5.6-1.2-6.2-3.5c-1-3.4.6-7.4 4.6-9z"/><path d="M10 12.5h4"/></g></symbol>
+        <symbol id="avdp-i-demonstration-extension" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-7"/><path d="M12 14c-3 0-5-2-5-5 3 0 5 2 5 5z"/><path d="M12 12c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M4 20h16"/><path d="M6 20v-3"/><path d="M18 20v-3"/></g></symbol>
+        <symbol id="avdp-i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+        <symbol id="avdp-i-map" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5"/><path d="M15 6.5V20"/></g></symbol>
+        <symbol id="avdp-i-alert" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4.5"/><path d="M12 17.5h.01"/></g></symbol>
+    </defs>
+</svg>
+
+<div class="avdp-home">
+    <section class="avdp-hero" aria-labelledby="avdp-hero-title">
+        <div class="avdp-wrap avdp-hero-grid">
+            <div>
+                <p class="avdp-eyebrow">{% trans "Sierra Leone · Agriculture & rural infrastructure" %}</p>
+                <h1 id="avdp-hero-title">{% trans "Agricultural data, mapped and shared." %}</h1>
+                <p class="avdp-lede">{% blocktrans %}The AVDP GIS Portal brings farm, water, road, storage and extension data into one catalogue. Find a dataset, see it on a map with other layers, inspect individual features and download what you are authorised to use.{% endblocktrans %}</p>
+                <div class="avdp-cta">
+                    <a class="avdp-btn avdp-btn-primary" id="avdp-cta-map" href="/maps">
+                        <svg aria-hidden="true"><use href="#avdp-i-map"/></svg>{% trans "Explore maps" %}
+                    </a>
+                    <a class="avdp-btn avdp-btn-secondary" href="/datasets">{% trans "Browse datasets" %}</a>
+                </div>
+                <ul class="avdp-stats" aria-label="{% trans 'Catalogue summary' %}">
+                    <li><span class="avdp-stat-value" data-avdp-count="dataset">–</span><span class="avdp-stat-label">{% trans "Datasets" %}</span></li>
+                    <li><span class="avdp-stat-value" data-avdp-count="map">–</span><span class="avdp-stat-label">{% trans "Maps" %}</span></li>
+                    <li><span class="avdp-stat-value" data-avdp-count="document">–</span><span class="avdp-stat-label">{% trans "Documents" %}</span></li>
+                </ul>
+            </div>
+            <div>
+                <a class="avdp-feature" id="avdp-feature" href="/maps">
+                    <div class="avdp-feature-img" id="avdp-feature-img">
+                        <p class="avdp-feature-empty" id="avdp-feature-empty">
+                            {% if request.user.is_authenticated %}
+                                {% trans "No maps have been shared with you yet." %}
+                            {% else %}
+                                {% trans "No public maps yet. Sign in to see maps shared with you." %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="avdp-feature-body">
+                        <div>
+                            <div class="avdp-feature-kicker">{% trans "Featured map" %}</div>
+                            <p class="avdp-feature-title" id="avdp-feature-title">{% trans "Maps catalogue" %}</p>
+                        </div>
+                        <span class="avdp-feature-go" aria-hidden="true"><svg><use href="#avdp-i-arrow"/></svg></span>
+                    </div>
                 </a>
-            </li>
-            <li>
-                <a class="avdp-action avdp-action-green" href="/maps">
-                    <span class="avdp-action-title">{% trans "Explore Maps" %}</span>
-                    {% trans "Open saved maps that combine several layers, with a legend, layer visibility controls and feature information." %}
-                </a>
-            </li>
-            <li>
-                {% if request.user.is_authenticated %}
-                <a class="avdp-action" href="/catalogue/#/upload/dataset">
-                    <span class="avdp-action-title">{% trans "Upload Data" %}</span>
-                    {% trans "Add a shapefile, GeoPackage, GeoJSON, KML or CSV. New uploads stay private to you until you share or publish them." %}
-                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="avdp-section" aria-labelledby="avdp-themes-title">
+        <div class="avdp-wrap">
+            <div class="avdp-section-head">
+                <div>
+                    <h2 id="avdp-themes-title">{% trans "Browse by theme" %}</h2>
+                    <p class="avdp-section-sub">{% trans "Every dataset is filed under one AVDP category." %}</p>
+                </div>
+                <a class="avdp-link" href="/datasets">{% trans "All datasets" %} →</a>
+            </div>
+            <ul class="avdp-themes">
+                {% for theme in themes %}
+                <li>
+                    <a class="avdp-theme" href="/all#/?filter%7Btkeywords%7D={{ theme.id }}">
+                        <span class="avdp-theme-icon"><svg aria-hidden="true"><use href="#avdp-i-{{ theme.slug }}"/></svg></span>
+                        <span class="avdp-theme-name">{{ theme.label }}</span>
+                        <span class="avdp-theme-desc">{{ theme.description }}</span>
+                        <span class="avdp-theme-count" data-avdp-theme="{{ theme.id }}"></span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="avdp-notice" role="note">
+                <svg aria-hidden="true"><use href="#avdp-i-alert"/></svg>
+                <div>
+                    <strong>{% trans "Demonstration content." %}</strong>
+                    {% blocktrans %}Resources marked “SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS” contain invented locations and figures used to test the portal. Do not use them for planning, reporting or decision-making.{% endblocktrans %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="avdp-section" aria-labelledby="avdp-contribute-title">
+        <div class="avdp-wrap">
+            <div class="avdp-section-head">
+                <div>
+                    <h2 id="avdp-contribute-title">{% trans "Contribute data" %}</h2>
+                    <p class="avdp-section-sub">{% trans "Editors add datasets in three steps. New uploads stay private until shared." %}</p>
+                </div>
+                {% if request.user.is_authenticated and perms.base.add_resourcebase %}
+                    <a class="avdp-btn avdp-btn-primary" href="/catalogue/#/upload/dataset">{% trans "Upload data" %}</a>
                 {% else %}
-                <a class="avdp-action" href="/account/login/?next=/catalogue/%23/upload/dataset">
-                    <span class="avdp-action-title">{% trans "Upload Data" %}</span>
-                    {% trans "Sign in with an editor account to upload data. Accounts are created by portal administrators." %}
-                </a>
+                    <a class="avdp-link" href="/upload-guide/">{% trans "Read the data guide" %} →</a>
                 {% endif %}
-            </li>
-        </ul>
-        <p>
-            <a href="/upload-guide/">{% trans "Read the data guide" %}</a>
-            {% trans "for accepted formats, coordinate reference systems, required metadata and how sharing works." %}
-        </p>
-
-        <div class="avdp-notice" role="note">
-            <strong>{% trans "About demonstration content:" %}</strong>
-            {% blocktrans %}Datasets and maps labelled “SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS” contain invented locations and figures used to test the portal. Do not use them for planning, reporting or decision-making.{% endblocktrans %}
+            </div>
+            <ol class="avdp-steps">
+                <li><h3>{% trans "Prepare" %}</h3><p>{% trans "Shapefile, GeoPackage, GeoJSON, KML or CSV, ideally in WGS 84 (EPSG:4326), with meaningful attribute names." %}</p></li>
+                <li><h3>{% trans "Upload" %}</h3><p>{% trans "Files are checked and published in the background. You stay the owner; nobody else sees the dataset yet." %}</p></li>
+                <li><h3>{% trans "Describe & share" %}</h3><p>{% trans "Add category, source, date and licence, choose a style, then share with AVDP Viewers or Editors." %}</p></li>
+            </ol>
         </div>
+    </section>
 
-        {% if not request.user.is_authenticated %}
-        <div class="avdp-info" role="note">
-            {% blocktrans %}You are browsing as a visitor, so you only see resources that have been made public. If a list below is empty, no public resources are available yet — sign in to see data shared with you.{% endblocktrans %}
-        </div>
-        {% endif %}
-    </div>
+</div>
+<div class="gn-container avdp-latest">
     <div id="gn-home-featured-resources-grid"></div>
     <div id="gn-home-resources-grid"></div>
 </div>
+
+<script>
+    (function () {
+        var MARKER = 'avdp-synthetic-demo';
+        function get(url) {
+            return fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .catch(function () { return null; });
+        }
+        function fmt(n) { return (n || 0).toLocaleString(); }
+
+        // Catalogue summary (counts only what this visitor may see)
+        ['dataset', 'map', 'document'].forEach(function (type) {
+            get('/api/v2/resources?page_size=1&filter{resource_type}=' + type).then(function (data) {
+                var el = document.querySelector('[data-avdp-count="' + type + '"]');
+                if (el) { el.textContent = data ? fmt(data.total) : '–'; }
+            });
+        });
+
+        // Theme counts from the AVDP category facet
+        get('/api/v2/facets/avdp-categories').then(function (data) {
+            var counts = {};
+            ((data && data.topics && data.topics.items) || []).forEach(function (t) { counts[t.key] = t.count; });
+            document.querySelectorAll('[data-avdp-theme]').forEach(function (el) {
+                var n = counts[el.getAttribute('data-avdp-theme')] || 0;
+                el.setAttribute('data-count', n);
+                el.textContent = n === 1 ? '1 resource' : fmt(n) + ' resources';
+            });
+        });
+
+        // Featured map: a map flagged "featured", otherwise the most recent one
+        function showMap(map) {
+            if (!map) { return false; }
+            var link = document.getElementById('avdp-feature');
+            var cta = document.getElementById('avdp-cta-map');
+            link.href = map.detail_url;
+            cta.href = map.detail_url;
+            document.getElementById('avdp-feature-title').textContent = map.title;
+            var box = document.getElementById('avdp-feature-img');
+            if (map.thumbnail_url) {
+                var img = new Image();
+                img.alt = '';
+                img.src = map.thumbnail_url;
+                box.innerHTML = '';
+                box.appendChild(img);
+            }
+            var demo = (map.keywords || []).some(function (k) { return k.slug === MARKER || k.name === MARKER; });
+            if (demo) {
+                var chip = document.createElement('span');
+                chip.className = 'avdp-chip';
+                chip.textContent = 'Synthetic demo';
+                link.appendChild(chip);
+            }
+            return true;
+        }
+        var base = '/api/v2/resources?page_size=1&include[]=keywords&filter{resource_type}=map';
+        get(base + '&filter{featured}=true').then(function (data) {
+            var featured = data && data.resources && data.resources[0];
+            if (showMap(featured)) { return; }
+            get(base + '&sort[]=-date').then(function (latest) {
+                showMap(latest && latest.resources && latest.resources[0]);
+            });
+        });
+    })();
+</script>
 {% endblock %}
