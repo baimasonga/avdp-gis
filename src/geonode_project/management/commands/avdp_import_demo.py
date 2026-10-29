@@ -102,6 +102,8 @@ class Command(BaseCommand):
         except get_user_model().DoesNotExist:
             raise CommandError(f"Owner '{opts['owner']}' does not exist.")
         self.opts = opts
+        # Recorded in metadata so each dataset names the file it actually came from.
+        self.source_name = os.path.basename(os.path.normpath(package))
         work = tempfile.mkdtemp(prefix="avdp_demo_")
         try:
             root = package
@@ -236,15 +238,15 @@ class Command(BaseCommand):
         title = f"{spec.title} — SYNTHETIC DEMO"
         abstract = (
             f"{dp.SYNTHETIC_NOTICE}\n\n"
-            f"{spec.title} layer from the AVDP synthetic GIS sample package, imported for portal "
-            f"demonstration and testing. Expected features: {spec.expected_count}.\n\n"
+            f"{spec.title} layer imported from '{self.source_name}' for portal demonstration and testing. "
+            f"Expected features: {spec.expected_count}.\n\n"
             f"Limitations: {LIMITATIONS}"
         )
         vals = {
             "title": title,
             "abstract": abstract,
             "purpose": "Demonstration and testing of the AVDP GIS Portal only.",
-            "attribution": f"Synthetic sample package ({dp.PACKAGE_NAME}); not an official AVDP source.",
+            "attribution": f"Synthetic sample package ({self.source_name}); not an official AVDP source.",
             "data_quality_statement": LIMITATIONS,
             "supplemental_information": (
                 f"{dp.SYNTHETIC_NOTICE} District names in the attribute table are illustrative labels, "
