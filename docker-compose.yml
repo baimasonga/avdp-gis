@@ -32,6 +32,10 @@ x-common-django:
       condition: service_healthy
     redis:
       condition: service_healthy
+    # GeoNode 5.1 stores sessions in the "memcached" cache alias whenever the
+    # cached_db session engine is used, regardless of MEMCACHED_ENABLED.
+    memcached:
+      condition: service_healthy
 
 services:
 
@@ -107,7 +111,7 @@ services:
       retries: 3
       start_period: 10s
 
-  # Optional Django cache (MEMCACHED_ENABLED in .env).
+  # Session store (required) and optional Django cache (MEMCACHED_ENABLED).
   memcached:
     image: ${MEMCACHED_IMAGE}
     container_name: memcached4${COMPOSE_PROJECT_NAME}
