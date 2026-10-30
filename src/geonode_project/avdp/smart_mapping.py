@@ -441,3 +441,18 @@ def apply(dataset, force=False, type_field=None, popup=True, thumbnail=True, rep
     if updates:
         parts.append("pop-up template set")
     return "; ".join(parts)
+
+
+def write_default_style(dataset, sld):
+    """Replace a dataset's default style body (keeps its name, links and legends)."""
+    from geonode.geoserver.helpers import _invalidate_geowebcache_dataset, gs_catalog, set_styles
+
+    gs = GeoServer()
+    style = dataset.default_style
+    name = style.name if style and style.workspace in (None, "", WORKSPACE) else dataset.name
+    gs.put_style(name, sld)
+    if not style or style.name != name:
+        gs.set_layer_styles(dataset.alternate, name, [])
+    gs_catalog.reset()
+    set_styles(dataset, gs_catalog)
+    _invalidate_geowebcache_dataset(dataset.alternate)

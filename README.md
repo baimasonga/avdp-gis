@@ -102,6 +102,33 @@ docker compose exec django python manage.py avdp_import_demo /usr/src/project/da
 The import is safe to re-run. Demo resources stay private (shared with the AVDP
 groups) unless you add `--public`. Details: [docs/DATA_IMPORT.md](docs/DATA_IMPORT.md).
 
+### District boundaries, summary and dashboard
+
+Load the official district boundaries once (downloads ~10 MB from the
+Humanitarian Data Exchange), then build the district summary and the
+*AVDP district overview* dashboard (menu **Dashboards**):
+
+```bash
+docker compose exec django python manage.py avdp_load_boundaries
+```
+
+```bash
+docker compose exec django python manage.py avdp_district_summary
+```
+
+```bash
+docker compose exec django python manage.py avdp_dashboard
+```
+
+Re-run the last two after adding or sharing data. To check district labels in
+your data against the boundaries:
+
+```bash
+docker compose exec django python manage.py avdp_district_check
+```
+
+Details: [docs/DATA_IMPORT.md](docs/DATA_IMPORT.md#district-boundaries-summary-and-dashboard).
+
 ## Documentation
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, versions, customisations

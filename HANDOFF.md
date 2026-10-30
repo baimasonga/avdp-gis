@@ -98,6 +98,30 @@ Note: datasets uploaded through **Upload Data** get GeoServer's default
 style; the AVDP cartography is applied only by `avdp_import_demo` (or by
 uploading an SLD in the dataset's style editor).
 
+## Iteration 6 — district boundaries and dashboard
+
+- `avdp_load_boundaries`: official district boundaries (OCHA COD-AB,
+  Government of Sierra Leone, CC BY-IGO; 16 districts) with validation,
+  metadata/licence, outline style and sharing. Not bundled; downloaded or
+  read from a local copy.
+- `avdp_district_check`: label-vs-location report (and CSV), read-only.
+- `avdp_district_summary`: per-district counts by AVDP category,
+  permission-aware, updated in place; choropleth styles per category.
+- `avdp_dashboard`: *AVDP district overview* (notice, three counters, map,
+  features per district and per province, district table); new
+  **Dashboards** menu item.
+- Verified: 16 districts loaded from the HDX shapefile zip (the sandbox
+  cannot download it from inside the container, so a copy was used; the
+  download path itself is untested here); label check against
+  known points (2 match, 1 deliberate mismatch, spelling alias matched);
+  summary 140/140 demo features assigned; dashboard rendered for admin and a
+  temporary AVDP Viewer account (counters, charts, map, table; account
+  deleted), anonymous refused; public mode tested end to end and reverted to
+  private; 40 unit tests; `security_smoke.py` 64/64 (new WPS checks).
+- Known: the test fixture's labels ("District A") are not district names, so
+  the check reports them as such; small-scale map labels may be thinned by
+  GeoServer's label conflict resolution.
+
 ## Iteration 5 — smart mapping for uploaded data
 
 Feedback: bring in the best vector-display features of ArcGIS Online and

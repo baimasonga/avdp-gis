@@ -179,11 +179,13 @@ def _safe_member_name(name):
     return "/".join(parts)
 
 
-def safe_extract(zip_path, dest_dir):
+def safe_extract(zip_path, dest_dir, include=None):
     """Extract a zip after checking every entry; returns the list of files written.
 
     Rejects traversal, absolute paths, symlinks, unexpected file types,
     oversized content and zip bombs. Nothing is written if a check fails.
+    include: optional predicate on the member name; other members are
+    neither checked nor written.
     """
     try:
         archive = zipfile.ZipFile(zip_path)
@@ -204,6 +206,8 @@ def safe_extract(zip_path, dest_dir):
             if info.is_dir():
                 continue
             if "__MACOSX" in name.split("/") or os.path.basename(name).startswith("._"):
+                continue
+            if include is not None and not include(name):
                 continue
             ext = os.path.splitext(name)[1].lower()
             if ext not in ALLOWED_EXTENSIONS:

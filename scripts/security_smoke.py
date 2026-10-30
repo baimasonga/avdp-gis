@@ -116,6 +116,31 @@ def can_download(client, pk, typename):
     return asset.status_code == 200 or shp_ok
 
 
+WPS_AGGREGATE = """<?xml version="1.0" encoding="UTF-8"?>
+<wps:Execute version="1.0.0" service="WPS" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs"
+ xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <ows:Identifier>gs:Aggregate</ows:Identifier><wps:DataInputs>
+  <wps:Input><ows:Identifier>features</ows:Identifier><wps:Reference mimeType="text/xml" xlink:href="http://geoserver/wfs" method="POST">
+   <wps:Body><wfs:GetFeature service="WFS" version="1.0.0" outputFormat="GML2"><wfs:Query typeName="{typename}"/></wfs:GetFeature></wps:Body>
+  </wps:Reference></wps:Input>
+  <wps:Input><ows:Identifier>aggregationAttribute</ows:Identifier><wps:Data><wps:LiteralData>fid</wps:LiteralData></wps:Data></wps:Input>
+  <wps:Input><ows:Identifier>function</ows:Identifier><wps:Data><wps:LiteralData>Count</wps:LiteralData></wps:Data></wps:Input>
+ </wps:DataInputs>
+ <wps:ResponseForm><wps:RawDataOutput mimeType="application/json"><ows:Identifier>result</ows:Identifier></wps:RawDataOutput></wps:ResponseForm>
+</wps:Execute>"""
+
+
+def wps_aggregate_ok(client, typename):
+    """True if a WPS aggregate over the layer returns numbers (used by dashboard counters/charts)."""
+    path = "/geoserver/wps"
+    token = client.ogc_token() if client.ogc_token else None
+    if token:
+        path += "?access_token=" + token
+    r = client.s.post(client.base + path, data=WPS_AGGREGATE.format(typename=typename).encode(),
+                      headers={"Content-Type": "application/xml"})
+    return r.status_code == 200 and '"AggregationResults"' in r.text
+
+
 def upload(client, filename, content, extra=None):
     files = {"base_file": (filename, content)}
     data = {"action": "upload", **(extra or {})}
@@ -193,6 +218,11 @@ def main():
             r = c.get(f"/showmetadata/xsl/{pk}")
             check(f"{role}: metadata XSL page {'allowed' if exp else 'denied'}",
                   (r.status_code == 200 and "avdp_demo" in r.text) == exp, str(r.status_code))
+
+        # WPS aggregates (dashboard counters/charts) read features like WFS, i.e. need "download"
+        for role in ("anonymous", "outsider", "viewer"):
+            exp = expect_download[role]
+            check(f"{role}: WPS aggregate {'allowed' if exp else 'denied'}", wps_aggregate_ok(clients[role], typename) == exp)
 
         # GeoServer administration is not open to the public
         r = clients["anonymous"].get("/geoserver/rest/workspaces.json")

@@ -201,6 +201,36 @@ Modelled on ArcGIS Online's smart mapping (`avdp/smart_mapping.py`):
   unless `--force`; a pop-up template is set only if none exists or it is an
   AVDP one.
 
+## Districts, summary and dashboard
+
+- **Boundaries** (`avdp/boundaries.py`, `avdp_load_boundaries`): OCHA COD-AB
+  admin-2 for Sierra Leone (Government of Sierra Leone, CC BY-IGO), validated
+  (16 districts, inside the national envelope, valid geometry) and imported
+  through the GeoNode importer as `avdp_sle_districts`; outline style with
+  one label per district (`interiorPoint` + `partials`, so tiles don't repeat
+  labels). Only the admin-2 members of the HDX zip are extracted — the
+  archive's padded line tables would otherwise trip the zip-bomb check.
+- **Spatial assignment** (`avdp/districts.py`): PostGIS join of
+  `ST_PointOnSurface(feature)` with the district polygons, so lines and
+  polygons count once. District names are compared with a normalised key
+  (accents, case, "District", spelling aliases).
+- **Summary** (`avdp_district_summary`): counts per AVDP category concept
+  (thesaurus `avdp-categories`) per district; datasets are included only if
+  the chosen audience may view them (guardian group permissions). Created
+  once through the importer, then updated in place with SQL (fixed columns),
+  so its id, links and the dashboard stay valid. Styles: quartile choropleths
+  for the total and each category, with a separate "None" class for zero.
+- **Dashboard** (`avdp/dashboard.py`, `avdp_dashboard`): a GeoNode GeoApp of
+  type dashboard created/updated through `/api/v2/geoapps`; MapStore widgets
+  (text, counters, map, bar charts in the `charts[].traces[]` format, table)
+  read the summary via WFS/WPS in the viewer's session. GeoNode treats
+  feature reads (WFS/WPS) as *download*, so the summary grants viewers (and,
+  when public, visitors) download; the public summary only counts public
+  data. `security_smoke.py` checks WPS aggregates are denied to anonymous
+  users and outsiders.
+- GeoNode 5.1 quirk: the GeoApp resource manager ignores `keywords` passed
+  together with `vals`; the command sets them directly.
+
 ## Upload protections (GeoNode 5.1.1, retained)
 
 - `FileValidationUploadHandler` / `SizeRestrictedFileUploadHandler`: extension

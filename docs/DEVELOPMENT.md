@@ -86,7 +86,7 @@ Unit tests for package extraction/validation and SLD generation (no database
 needed):
 
 ```bash
-docker compose exec -w /usr/src/project django python -m unittest geonode_project.tests.test_demo_package geonode_project.tests.test_smart_mapping -v
+docker compose exec -w /usr/src/project django python -m unittest geonode_project.tests.test_demo_package geonode_project.tests.test_smart_mapping geonode_project.tests.test_districts -v
 ```
 
 End-to-end permission and upload-security smoke test against the running

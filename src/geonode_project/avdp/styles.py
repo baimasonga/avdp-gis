@@ -510,17 +510,37 @@ def build_size_sld(name, title, field, field_label, vmin, vmax, colour):
     return _document(name, title, fts, f"Circle area shows {field_label}.")
 
 
-def build_choropleth_sld(name, title, field, field_label, breaks, geometry="geom", small=True):
-    """Shade polygons by a numeric field in classes (breaks = ascending edges)."""
+def _spread(n):
+    """n colours spread across the sequential ramp (light to dark)."""
+    if n >= len(SEQUENTIAL):
+        return list(SEQUENTIAL)
+    if n == 1:
+        return [SEQUENTIAL[2]]
+    step = (len(SEQUENTIAL) - 1) / (n - 1)
+    return [SEQUENTIAL[round(i * step)] for i in range(n)]
+
+
+def build_choropleth_sld(
+    name, title, field, field_label, breaks, geometry="geom", small=True, counts=False
+):
+    """Shade polygons by a numeric field in classes (breaks = ascending edges).
+
+    counts=True is for whole-number counts: zero gets its own "None" class,
+    and labels read "1–5", "6–17" (no overlapping edges).
+    """
     prop = f"<ogc:PropertyName>{escape(field)}</ogc:PropertyName>"
-    edges = sorted(set(float(b) for b in breaks))
+    edges = sorted(set(float(b) for b in breaks if not counts or b > 0))
+    if counts and edges:
+        edges[0] = max(edges[0], 1)
     if len(edges) < 2:
-        edges = [edges[0], edges[0] + 1] if edges else [0, 1]
+        edges = [edges[0], edges[0] + 1] if edges else [1, 2]
     classes = list(zip(edges[:-1], edges[1:]))
-    ramp = SEQUENTIAL[-len(classes) :] if len(classes) < len(SEQUENTIAL) else SEQUENTIAL
     sym = {"kind": "polygon", "colour": SEQUENTIAL[2], "small": small}
     rules = []
-    for i, ((low, high), colour) in enumerate(zip(classes, ramp)):
+    if counts:
+        zero = f"<ogc:Filter><ogc:PropertyIsEqualTo>{prop}<ogc:Literal>0</ogc:Literal></ogc:PropertyIsEqualTo></ogc:Filter>"
+        rules.append(_rule("None", _polygon("#f1efe7", 0.6), zero))
+    for i, ((low, high), colour) in enumerate(zip(classes, _spread(len(classes)))):
         last = i == len(classes) - 1
         upper = "PropertyIsLessThanOrEqualTo" if last else "PropertyIsLessThan"
         flt = (
@@ -529,7 +549,11 @@ def build_choropleth_sld(name, title, field, field_label, breaks, geometry="geom
             f"<ogc:{upper}>{prop}<ogc:Literal>{high}</ogc:Literal></ogc:{upper}>"
             "</ogc:And></ogc:Filter>"
         )
-        text = f"{fmt_number(low)} – {fmt_number(high)}"
+        if counts:
+            top = high if last else high - 1
+            text = fmt_number(low) if top <= low else f"{fmt_number(low)}–{fmt_number(top)}"
+        else:
+            text = f"{fmt_number(low)} – {fmt_number(high)}"
         rules.append(_rule(text, _polygon(colour), flt, inclusion="legendOnly"))
         for min_s, max_s, body in _bands(sym, colour, False, geometry):
             rules.append(_rule(text, body, flt, _scale(min_s, max_s), inclusion="mapOnly"))

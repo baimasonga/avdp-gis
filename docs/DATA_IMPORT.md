@@ -45,6 +45,76 @@ attribute is a label supplied with the data. Do not use GeoNode *Regions* to
 claim district coverage unless the features were checked against official
 district boundaries; record the verification in the data quality statement.
 
+## District boundaries, summary and dashboard
+
+### Boundaries (once)
+
+```bash
+docker compose exec django python manage.py avdp_load_boundaries
+```
+
+Downloads the Sierra Leone administrative boundaries (COD-AB) from the
+Humanitarian Data Exchange — source *Government of Sierra Leone*, published by
+OCHA, licence **CC BY-IGO 3.0** (attribution required; it is in the dataset's
+metadata). Only the admin-2 layer is used: **16 districts** (2017 structure,
+including Falaba and Karene; the source spells Falaba "Fabala" — the dataset
+shows "Falaba" and keeps the original in `district_source_name`). The command
+validates the count, CRS and extent, and refuses anything else.
+
+Without internet on the server, download `sle_admin_boundaries.shp.zip` from
+<https://data.humdata.org/dataset/cod-ab-sle> elsewhere, copy it into
+`data/demo/` and run
+`avdp_load_boundaries --source /usr/src/project/data/demo/sle_admin_boundaries.shp.zip`.
+Re-running refreshes metadata/style/sharing; `--replace` imports a new release.
+Boundaries are shared with AVDP Viewers/Editors; add `--public` for visitors.
+
+### District label check (read-only)
+
+```bash
+docker compose exec django python manage.py avdp_district_check
+```
+
+For every dataset with a district field (`district`, `dist_label`,
+`district_name`, …) it reports how many labels match the district the feature
+lies in, mismatches with examples, labels that are not district names and
+features outside the country. Spelling variants are matched ("Western Urban",
+"Freetown" = Western Area Urban; "Fabala" = Falaba). One row per feature:
+
+```bash
+docker compose exec -T django python manage.py avdp_district_check --csv - > district_check.csv
+```
+
+### District summary and dashboard
+
+```bash
+docker compose exec django python manage.py avdp_district_summary
+docker compose exec django python manage.py avdp_dashboard
+```
+
+The summary is a dataset (*District summary — AVDP features per category*)
+with one row per district: the number of features of each AVDP dataset
+category located in it, and a total. A dataset is counted only if it has an
+*AVDP dataset category* in its metadata and is shared with AVDP Viewers (or
+the public) — so the figures never reveal private data. `--audience public`
+counts public datasets only; `--audience all` ignores sharing (for
+administrators' own use). In the map viewer the summary offers one choropleth
+style per category (*layer settings → Style*).
+
+The dashboard (*AVDP district overview*, menu **Dashboards**) shows totals,
+a map, features per district and per province, and the district table. Both
+commands update the same resources in place, so links stay valid; re-run
+them after adding or sharing data. To publish the dashboard to visitors:
+
+```bash
+docker compose exec django python manage.py avdp_load_boundaries --public
+docker compose exec django python manage.py avdp_district_summary --audience public --public
+docker compose exec django python manage.py avdp_dashboard --public
+```
+
+Counts are numbers of mapped features, not people, households or hectares.
+If any counted dataset is synthetic, the summary and dashboard carry the
+synthetic-data notice and banner.
+
 ## Demonstration package
 
 ### Status
@@ -168,6 +238,11 @@ all of them:
 ```bash
 docker compose exec django python manage.py shell -c "from geonode.base.models import ResourceBase as R; from geonode.resource.registry import resource_manager_registry as m; [m.get_for_instance(r.get_real_instance()).delete(r.uuid, instance=r.get_real_instance()) for r in R.objects.filter(keywords__name='avdp-synthetic-demo').distinct()]"
 ```
+
+While demo data is counted, the district summary and dashboard also carry the
+`avdp-synthetic-demo` keyword, so the command above removes them too. Re-run
+`avdp_district_summary` and `avdp_dashboard` afterwards (the dashboard then
+gets a new link).
 
 ### Demo-data limitations (shown in metadata and in the portal)
 
