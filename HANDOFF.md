@@ -80,6 +80,24 @@ map symbology. Changes:
 - Verified by local rehearsal (fresh volumes, HTTPS proxy, 61/61 security
   checks over HTTPS); **not yet run in a real codespace**.
 
+## Iteration 4 — compact catalogue
+
+Feedback: large dataset cards would not leave enough room on the front page.
+Following the pattern of ArcGIS Online (table/list/grid views of content) and
+ArcGIS Hub (categories and highlights on the front page, search elsewhere):
+
+- Homepage: the full MapStore resource grid is replaced by a compact
+  "Recently added" list (six rows, two columns) linking to the catalogue.
+- Catalogue: list layout by default on desktop (24 rows per page, columns
+  title / description / type / created / owner); cards remain one click away
+  and are the default on phones, with shorter thumbnails.
+- The homepage footer now follows the content instead of being fixed over it.
+- Verified with screenshots at 1366 px and 390 px, signed in and anonymous.
+
+Note: datasets uploaded through **Upload Data** get GeoServer's default
+style; the AVDP cartography is applied only by `avdp_import_demo` (or by
+uploading an SLD in the dataset's style editor).
+
 ## Verification performed (local Docker, this session)
 
 | # | Check | Result |

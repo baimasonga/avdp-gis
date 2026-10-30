@@ -2,10 +2,12 @@
 {% load i18n avdp_tags %}
 {% comment %}
 AVDP homepage. Extends the geonode-mapstore-client index.html: the header is
-kept (without the default hero), the content block is replaced, and the
-MapStore resource grids (featured + latest) are kept so the page stays driven
-by GeoNode's catalogue and permissions. All numbers and the featured map are
-read from GeoNode's API in the visitor's own session.
+kept (without the default hero) and the content block is replaced. The full
+MapStore catalogue grid is not rendered here: like ArcGIS Hub and other data
+portals, the front page shows themes and a short "Recently added" list that
+links into the catalogue, so it stays compact however many resources exist.
+All numbers, lists and the featured map are read from GeoNode's API in the
+visitor's own session, so they respect GeoNode permissions.
 {% endcomment %}
 
 {% block header %}
@@ -103,6 +105,21 @@ read from GeoNode's API in the visitor's own session.
         </div>
     </section>
 
+    <section class="avdp-section" aria-labelledby="avdp-recent-title">
+        <div class="avdp-wrap">
+            <div class="avdp-section-head">
+                <div>
+                    <h2 id="avdp-recent-title">{% trans "Recently added" %}</h2>
+                    <p class="avdp-section-sub">{% trans "The latest datasets, maps and documents you can access." %}</p>
+                </div>
+                <a class="avdp-link" href="/all">{% trans "Open the catalogue" %} →</a>
+            </div>
+            <ul class="avdp-recent" id="avdp-recent" aria-live="polite">
+                <li class="avdp-recent-empty">{% trans "Loading…" %}</li>
+            </ul>
+        </div>
+    </section>
+
     <section class="avdp-section" aria-labelledby="avdp-contribute-title">
         <div class="avdp-wrap">
             <div class="avdp-section-head">
@@ -124,10 +141,6 @@ read from GeoNode's API in the visitor's own session.
         </div>
     </section>
 
-</div>
-<div class="gn-container avdp-latest">
-    <div id="gn-home-featured-resources-grid"></div>
-    <div id="gn-home-resources-grid"></div>
 </div>
 
 <script>
@@ -156,6 +169,59 @@ read from GeoNode's API in the visitor's own session.
                 var n = counts[el.getAttribute('data-avdp-theme')] || 0;
                 el.setAttribute('data-count', n);
                 el.textContent = n === 1 ? '1 resource' : fmt(n) + ' resources';
+            });
+        });
+
+        // Recently added: a compact list instead of the full catalogue grid
+        var EMPTY = {% if request.user.is_authenticated %}'{% trans "Nothing has been shared with you yet." %}'{% else %}'{% trans "No public resources yet. Sign in to see resources shared with you." %}'{% endif %};
+        var TYPES = { dataset: 'Dataset', map: 'Map', document: 'Document', geostory: 'Story', dashboard: 'Dashboard' };
+        get('/api/v2/resources?page_size=6&sort[]=-date&include[]=keywords').then(function (data) {
+            var list = document.getElementById('avdp-recent');
+            var items = (data && data.resources) || [];
+            list.innerHTML = '';
+            if (!items.length) {
+                var li = document.createElement('li');
+                li.className = 'avdp-recent-empty';
+                li.textContent = EMPTY;
+                list.appendChild(li);
+                return;
+            }
+            items.forEach(function (r) {
+                var li = document.createElement('li');
+                var a = document.createElement('a');
+                a.className = 'avdp-recent-item';
+                a.href = r.detail_url;
+                var thumb = document.createElement('span');
+                thumb.className = 'avdp-recent-thumb';
+                if (r.thumbnail_url) {
+                    var img = new Image();
+                    img.alt = '';
+                    img.loading = 'lazy';
+                    img.src = r.thumbnail_url;
+                    thumb.appendChild(img);
+                }
+                var body = document.createElement('span');
+                body.className = 'avdp-recent-body';
+                var title = document.createElement('span');
+                title.className = 'avdp-recent-title';
+                title.textContent = r.title;
+                var meta = document.createElement('span');
+                meta.className = 'avdp-recent-meta';
+                var type = TYPES[r.resource_type] || r.resource_type;
+                var when = r.date ? new Date(r.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                meta.textContent = [type, when].filter(Boolean).join(' · ');
+                body.appendChild(title);
+                body.appendChild(meta);
+                a.appendChild(thumb);
+                a.appendChild(body);
+                if ((r.keywords || []).some(function (k) { return k.slug === MARKER || k.name === MARKER; })) {
+                    var chip = document.createElement('span');
+                    chip.className = 'avdp-chip';
+                    chip.textContent = 'Synthetic demo';
+                    a.appendChild(chip);
+                }
+                li.appendChild(a);
+                list.appendChild(li);
             });
         });
 
@@ -194,4 +260,15 @@ read from GeoNode's API in the visitor's own session.
         });
     })();
 </script>
+{% endblock %}
+
+{% block ms_scripts %}
+<script>
+    // The homepage has no MapStore resource grids (see the comment at the top);
+    // this runs after the upstream listener and replaces its plugin list.
+    window.addEventListener('mapstore:ready', function (event) {
+        event.detail.setPluginsConfig(function () { return []; });
+    });
+</script>
+{{ block.super }}
 {% endblock %}

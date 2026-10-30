@@ -111,10 +111,26 @@ Homepage (`templates/index.html`): split hero with a featured map (a map
 flagged *featured*, otherwise the newest map the visitor may see), live
 catalogue counts, theme tiles for the seven AVDP categories with per-visitor
 counts from the facet API and deep links to the filtered catalogue
-(`/all#/?filter{tkeywords}=<id>`), a three-step contribution guide, and the
-upstream resource grid. All numbers come from GeoNode's API in the visitor's
-session, so they respect permissions. Theme tiles are rendered server-side by
-the `avdp_themes` template tag (`templatetags/avdp_tags.py`).
+(`/all#/?filter{tkeywords}=<id>`), a compact "Recently added" list (the six
+newest resources as one-line rows with a small thumbnail) and a three-step
+contribution guide. All numbers and lists come from GeoNode's API in the
+visitor's session, so they respect permissions. Theme tiles are rendered
+server-side by the `avdp_themes` template tag (`templatetags/avdp_tags.py`).
+
+The full MapStore catalogue grid is deliberately **not** on the homepage
+(its plugin list is emptied there in the `ms_scripts` block): with large
+cards it pushes everything else down once there are more than a handful of
+resources. This follows data portals such as ArcGIS Hub, where the front page
+offers categories and a few highlights and the searchable catalogue lives on
+its own page.
+
+Catalogue pages (`/all`, `/datasets`, `/maps`, `/documents`) default to the
+**list** layout on screens 768 px and wider: one row per resource with
+title, description, type, created date and owner, 24 per page (the same idea
+as the list/table views in ArcGIS Online's content page). Phones default to
+cards with a short thumbnail. The grid/list button stays, and the browser
+remembers each visitor's choice. Configured in `overrideLocalConfig`
+(`_geonode_config.html`).
 
 ## Cartography
 

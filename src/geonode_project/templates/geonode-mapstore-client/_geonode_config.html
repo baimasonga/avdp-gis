@@ -2,7 +2,27 @@
 {% block override_local_config %}
 <script>
     window.__GEONODE_CONFIG__.overrideLocalConfig = function(localConfig, _) {
-        // Here the localConfig can be overridden and/or extended
+        // AVDP: open the catalogue as a compact list (one row per resource,
+        // like the list/table views of ArcGIS Online and GeoNetwork) with more
+        // results per page. The grid/list button still lets each visitor
+        // switch; their choice is remembered by the browser. On phones the
+        // columns would be too narrow, so cards (one per row) stay the default.
+        var narrow = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+        var catalogue = (localConfig.plugins && localConfig.plugins.catalogue) || [];
+        catalogue.forEach(function (plugin) {
+            if (plugin.name !== 'ResourcesGrid') { return; }
+            plugin.cfg = plugin.cfg || {};
+            plugin.cfg.defaultCardLayoutStyle = narrow ? 'grid' : 'list';
+            plugin.cfg.pageSize = 24;
+            plugin.cfg.metadata = plugin.cfg.metadata || {};
+            plugin.cfg.metadata.list = [
+                { path: 'title', width: 32, labelId: 'gnviewer.columnTitle' },
+                { path: 'raw_abstract', width: 33, labelId: 'resourcesCatalog.columnDescription' },
+                { path: 'resource_type', width: 10, labelId: 'gnviewer.type' },
+                { path: 'created', width: 12, type: 'date', format: 'D MMM YYYY', labelId: 'resourcesCatalog.columnCreated', noDataLabelId: 'resourcesCatalog.emptyNA' },
+                { path: 'owner.username', width: 13, labelId: 'gnviewer.columnOwner', icon: { glyph: 'user' }, image: { path: 'owner.avatar' }, noDataLabelId: 'resourcesCatalog.emptyUnknown' }
+            ];
+        });
         return localConfig;
     };
 </script>

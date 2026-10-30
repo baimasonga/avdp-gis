@@ -543,11 +543,75 @@
     line-height: 1.5;
 }
 
-/* Latest resources (MapStore grid on the homepage), aligned to the page grid */
-.gn-theme .gn-container.avdp-latest {
-    max-width: var(--avdp-max);
-    margin: 0 auto;
-    padding: 40px 12px 48px 12px;
+/* The upstream footer is fixed to the viewport; the homepage scrolls, so
+   place it after the content instead of over it. */
+.msgapi .gn-theme.gn-homepage:has(.avdp-home) .gn-footer {
+    position: relative;
+}
+
+/* Recently added: compact rows (thumbnail, title, type and date) in two columns */
+.avdp-recent {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 24px;
+}
+.avdp-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--avdp-line);
+    border-radius: var(--avdp-radius);
+    background: var(--avdp-surface);
+    color: var(--avdp-ink);
+    text-decoration: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.avdp-recent-item:hover,
+.avdp-recent-item:focus-visible {
+    border-color: var(--avdp-line-strong);
+    box-shadow: var(--avdp-shadow-lift);
+    color: var(--avdp-ink);
+    text-decoration: none;
+}
+.avdp-recent-thumb {
+    flex: 0 0 64px;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--avdp-line);
+}
+.avdp-recent-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.avdp-recent-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.avdp-recent-title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.avdp-recent-meta {
+    color: var(--avdp-muted);
+    font-size: 0.85rem;
+}
+.avdp-recent .avdp-chip {
+    flex: 0 0 auto;
+}
+.avdp-recent-empty {
+    grid-column: 1 / -1;
+    color: var(--avdp-muted);
 }
 
 @media (max-width: 960px) {
@@ -569,8 +633,12 @@
         background-size: 620px auto;
     }
     .avdp-themes,
-    .avdp-steps {
-        grid-template-columns: 1fr;
+    .avdp-steps,
+    .avdp-recent {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .avdp-recent .avdp-chip {
+        display: none;
     }
     .avdp-steps li + li {
         border-left: 0;
@@ -618,6 +686,32 @@
 .gn-theme .ms-resource-card-body-footer {
     color: var(--avdp-muted);
     font-size: 0.85rem;
+}
+
+/* List view (the catalogue default): one dense row per resource with a
+   small thumbnail, so a page shows ~10 rows instead of 3-4 large cards. */
+.gn-theme .ms-resources-container-list {
+    gap: 6px;
+}
+.gn-theme .ms-resources-container-list .ms-resource-card {
+    border-radius: 6px;
+}
+.gn-theme .ms-resources-container-list .ms-resource-card .ms-resource-card-img {
+    border-bottom: 0;
+    border-right: 1px solid var(--avdp-line);
+}
+
+/* Phones keep cards (one per column) but with a short banner thumbnail. */
+@media (max-width: 767px) {
+    .gn-theme .ms-resources-container-grid .ms-resource-card .ms-resource-card-img {
+        height: 112px;
+        overflow: hidden;
+    }
+    .gn-theme .ms-resources-container-grid .ms-resource-card .ms-resource-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 }
 
 /* ------------------------------------------------------------------ */
