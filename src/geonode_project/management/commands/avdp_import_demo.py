@@ -44,7 +44,8 @@ from geonode.security.permissions import PermSpecCompact
 from geonode.upload.models import ResourceHandlerInfo
 
 from geonode_project.avdp import demo_package as dp
-from geonode_project.avdp import styles
+from geonode_project.avdp import signals as avdp_signals
+from geonode_project.avdp import smart_mapping, styles
 from geonode_project.avdp.feature_info import build_template
 from geonode_project.avdp.map_icons import publish_icons
 from geonode_project.avdp.demo_map import MAP_MARKER, MAP_TITLE, build_map_payload
@@ -238,6 +239,7 @@ class Command(BaseCommand):
                 f"{getattr(response, 'data', response.content)}"
             )
         exec_id = response.data["execution_id"]
+        avdp_signals.suppress(exec_id)  # this command applies its own cartography below
         dataset = self._wait_for(spec, exec_id)
         # Mark immediately so a re-run recognises this dataset even if a later step fails.
         _manager(dataset).update(
@@ -308,6 +310,8 @@ class Command(BaseCommand):
             dataset.uuid, instance=dataset, vals=vals, keywords=keywords, regions=["SLE"], notify=False
         )
         self._apply_style(spec, dataset, files)
+        # Offer the alternative views (heat map, clusters, ...) next to the theme style.
+        smart_mapping.apply(dataset, replace_default=False, popup=False, thumbnail=False)
         self._refresh_thumbnail(dataset)
         self._apply_permissions(dataset)
         self.stdout.write(f"{spec.title}: metadata, style and sharing applied.")

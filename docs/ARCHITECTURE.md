@@ -166,6 +166,41 @@ list and legends.
   with `AVDP_BASEMAP_URL` (see DEPLOYMENT.md). Thumbnails use the same
   background.
 
+### Smart mapping (any uploaded vector dataset)
+
+Modelled on ArcGIS Online's smart mapping (`avdp/smart_mapping.py`):
+
+- **Trigger.** GeoNode's importer completes an upload in the Celery task
+  `geonode.upload.import_orchestrator` and marks the execution finished with
+  a queryset `update()` (no model signal), so `avdp/signals.py` listens for
+  that task's Celery `task_success` signal. A memcached key makes it run
+  once per upload. `avdp_import_demo` suppresses it for its own uploads and
+  then adds only the alternatives. Off with `AVDP_AUTO_STYLE=False`.
+- **Profile.** Geometry type, attribute types, distinct values of text fields
+  and min/max/quintiles of number fields are read from the PostGIS table;
+  for polygons the median area decides whether they become centroid markers
+  at national scale (median under 25 km²) or stay polygons.
+- **Default style.** If the name/title suggests an AVDP theme with matching
+  geometry (wells → water points, roads → feeder roads, …) its symbol is
+  used, otherwise a generic dot/line/fill. Colour classes come from the first
+  suitable text field (2–8 values; status-like names first, then type/crop/
+  category; names and IDs are skipped): status fields get the semantic
+  traffic-light colours, crop fields the crop colours. Labels at local scale.
+- **Alternative styles** are registered on the GeoServer layer (names
+  `<dataset>__avdp_<kind>`), so MapStore lists them under *layer settings →
+  Style* with a title and one-line description: *Location (single symbol)*,
+  *Heat map (density)* and *Clusters* (points), *Sized by <field>*
+  (proportional circles, area ∝ value), *Shaded by <field>* (polygons,
+  quintile classes, sequential greens; area fields preferred).
+- **Tile-safe by design.** GeoServer's `vec:Heatmap` normalises each tile to
+  its own maximum, which showed visible seams in the tiled viewer, so the
+  heat map is drawn as stacked translucent halos instead. Clusters use
+  `vec:PointStacker` with a 64 px cell (divides the 256 px tile, so adjacent
+  tiles agree) and `partials` for count labels on tile edges.
+- **Never overwrites** a style carrying the AVDP marker (the SLD abstract)
+  unless `--force`; a pop-up template is set only if none exists or it is an
+  AVDP one.
+
 ## Upload protections (GeoNode 5.1.1, retained)
 
 - `FileValidationUploadHandler` / `SizeRestrictedFileUploadHandler`: extension

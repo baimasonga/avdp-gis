@@ -9,6 +9,23 @@ GeoTIFF. Uploads are processed by GeoNode's importer in the background and are
 **private** to the uploader and administrators until shared. The public data
 guide is at `/upload-guide/`.
 
+**Automatic styling ("smart mapping").** When a vector upload finishes, the
+portal replaces GeoServer's generic style (e.g. red squares) with an AVDP
+style chosen from the data (see docs/ARCHITECTURE.md → *Smart mapping*), sets
+a formatted pop-up and re-renders the thumbnail. Alternative styles (single
+symbol, heat map, clusters, sized or shaded by a number field) are offered in
+the map viewer under *layer settings → Style*. To style datasets that existed
+before this feature, or to colour by another field:
+
+```bash
+docker compose exec django python manage.py avdp_style_datasets            # all still on a generic style
+docker compose exec django python manage.py avdp_style_datasets farm_plots --field crop --force
+```
+
+`--force` replaces an existing AVDP style; styles edited by hand in the style
+editor are only replaced with `--force`. Set `AVDP_AUTO_STYLE=False` in `.env`
+to turn automatic styling off.
+
 Then complete metadata (*Edit → Edit metadata*). Recommended minimum:
 
 | Item | GeoNode field |

@@ -98,6 +98,31 @@ Note: datasets uploaded through **Upload Data** get GeoServer's default
 style; the AVDP cartography is applied only by `avdp_import_demo` (or by
 uploading an SLD in the dataset's style editor).
 
+## Iteration 5 — smart mapping for uploaded data
+
+Feedback: bring in the best vector-display features of ArcGIS Online and
+similar systems. The viewer already had attribute table, query filter,
+measure, print, swipe, timeline and place search; what was missing was
+ArcGIS-style *smart mapping*:
+
+- **Automatic styling of every vector upload** (no more red squares):
+  theme-aware symbols, colour by a status/type field, labels when zoomed in,
+  centroid markers for small polygons at national scale, formatted pop-ups,
+  refreshed thumbnail. Off with `AVDP_AUTO_STYLE=False`.
+- **Switchable styles** in the map viewer (*layer settings → Style*): single
+  symbol, heat map, clusters with counts, proportional circles, choropleth.
+- `avdp_style_datasets` command for existing datasets or another field.
+- Found while verifying: GeoServer's heat map process and a 46 px cluster
+  grid produced seams/clipped symbols in the tiled viewer; replaced with a
+  halo heat map and a 64 px tile-aligned cluster grid (checked by stitching
+  adjacent tiles).
+- Verified: 12 new unit tests + 19 existing pass; a 400-point and a
+  40-polygon GeoJSON upload through the importer API were styled
+  automatically; style list and switching checked in the browser; demo
+  import re-run (140 features, its own styles kept, alternatives added);
+  `security_smoke.py` 61/61; anonymous GetMap with an alternative style on a
+  private layer is refused. Test uploads were deleted afterwards.
+
 ## Verification performed (local Docker, this session)
 
 | # | Check | Result |

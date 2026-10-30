@@ -166,5 +166,9 @@ MIDDLEWARE = ("geonode_project.middleware.PublicSchemeMiddleware",) + tuple(
 )
 
 # Marker used to identify demonstration content created by `avdp_import_demo`.
+# Smart styles for new vector uploads (avdp/smart_mapping.py); set
+# AVDP_AUTO_STYLE=False to keep GeoServer's generic default styles.
+AVDP_AUTO_STYLE = ast.literal_eval(os.getenv("AVDP_AUTO_STYLE", "True"))
+
 AVDP_DEMO_KEYWORD = "avdp-synthetic-demo"
 AVDP_SYNTHETIC_NOTICE = "SYNTHETIC DEMONSTRATION DATA — NOT OFFICIAL AVDP RECORDS."
