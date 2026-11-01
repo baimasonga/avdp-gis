@@ -36,6 +36,8 @@ logger = logging.getLogger(__name__)
 
 WORKSPACE = "geonode"
 ALT_PREFIX = "__avdp_"
+DATE_TYPES = {"xsd:date", "xsd:dateTime", "xsd:datetime"}
+DATE_FIELD_HINTS = ("distribution_date", "date", "submitted", "start_date", "survey_date", "visit_date", "year_date")
 NUMERIC_TYPES = {"xsd:int", "xsd:integer", "xsd:long", "xsd:short", "xsd:double", "xsd:float", "xsd:decimal"}
 STRING_TYPES = {"xsd:string"}
 
@@ -424,6 +426,15 @@ def apply(dataset, force=False, type_field=None, popup=True, thumbnail=True, rep
         }
         Dataset.objects.filter(pk=dataset.pk).update(**updates)
 
+    time_note = ""
+    tfield = time_field(dataset)
+    if tfield and not dataset.has_time:
+        try:
+            enable_time(dataset, tfield)
+            time_note = f"time slider on '{tfield}'"
+        except Exception as exc:  # the style is still useful without it
+            logger.warning("AVDP: time dimension not set for %s: %s", dataset.alternate, exc)
+
     if thumbnail:
         try:
             from geonode.resource.registry import resource_manager_registry
@@ -440,7 +451,26 @@ def apply(dataset, force=False, type_field=None, popup=True, thumbnail=True, rep
         parts.append("alternatives: " + ", ".join(t for _s, t, _x in alternates))
     if updates:
         parts.append("pop-up template set")
+    if time_note:
+        parts.append(time_note)
     return "; ".join(parts)
+
+
+def time_field(dataset):
+    """The date column to drive the map's time slider, if any (typed date/datetime only)."""
+    dates = [a.attribute for a in dataset.attribute_set.all() if a.attribute_type in DATE_TYPES]
+    lower = {d.lower(): d for d in dates}
+    return next((lower[h] for h in DATE_FIELD_HINTS if h in lower), dates[0] if dates else None)
+
+
+def enable_time(dataset, field):
+    """Publish ``field`` as the layer's WMS time dimension so the viewer shows a time slider."""
+    from geonode.geoserver.helpers import _invalidate_geowebcache_dataset, set_time_info
+    from geonode.layers.models import Dataset
+
+    set_time_info(dataset, field, None, "LIST", None, None, enabled=True)
+    Dataset.objects.filter(pk=dataset.pk).update(has_time=True)
+    _invalidate_geowebcache_dataset(dataset.alternate)
 
 
 def write_default_style(dataset, sld):

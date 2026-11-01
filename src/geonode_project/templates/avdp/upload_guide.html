@@ -117,7 +117,15 @@
     <h2 id="photos">{% trans "6. Photos" %}</h2>
     <p>{% blocktrans %}A column named <code>photo_url</code> (or <code>photo</code>) is shown as a picture at the top of the feature pop-up. Upload site photos as <a href="/documents">Documents</a> (Upload Data → document), share them like the dataset, and paste each photo's address into the row. Photos of people need their consent; prefer photos of the facility.{% endblocktrans %}</p>
 
-    <h2 id="districts">{% trans "7. Districts, summary and dashboard" %}</h2>
+    <h2 id="more">{% trans "7. Time slider, printing and history" %}</h2>
+    <ul>
+        <li>{% trans "Datasets with a date column (for example distribution_date, as YYYY-MM-DD) get a time slider: press play at the top of the map to step through the dates." %}</li>
+        <li>{% trans "The print button produces a PDF with the AVDP header, title, legend, scale bar and date; fill in the title and notes in the print panel." %}</li>
+        <li>{% trans "Each dataset keeps a change history: open the Data check note on the dataset page and choose Change history." %}</li>
+        <li>{% blocktrans %}Survey data from KoboToolbox or ODK Central can be published and refreshed by an administrator (manage.py avdp_sync_form); names, phone numbers and ID numbers are left out.{% endblocktrans %}</li>
+    </ul>
+
+    <h2 id="districts">{% trans "8. Districts, summary and dashboard" %}</h2>
     <ul>
         <li>{% trans "The official district boundaries (Government of Sierra Leone / OCHA, 16 districts) are a dataset in the catalogue; add them to any map." %}</li>
         <li>{% trans "The District summary counts features per AVDP category in each district, for datasets that have an AVDP dataset category and are shared with AVDP Viewers or the public. Set the category in the metadata so your data is counted." %}</li>

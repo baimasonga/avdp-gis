@@ -121,7 +121,12 @@
                 }
                 list.appendChild(li);
             });
-            el.querySelector('.avdp-quality-foot').textContent = 'Checked ' + new Date(data.checked).toLocaleString() + '. Checks run after each upload.';
+            var foot = el.querySelector('.avdp-quality-foot');
+            foot.textContent = 'Checked ' + new Date(data.checked).toLocaleString() + '. Checks run after each upload. ';
+            var link = document.createElement('a');
+            link.href = '/avdp/history/' + data.resource + '/';
+            link.textContent = 'Change history';
+            foot.appendChild(link);
             el.querySelector('.avdp-quality-panel').hidden = true;
             el.querySelector('button').setAttribute('aria-expanded', 'false');
             el.style.display = 'block';

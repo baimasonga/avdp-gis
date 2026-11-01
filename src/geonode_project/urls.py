@@ -26,7 +26,7 @@ from django.views.generic import TemplateView
 # related issue: https://github.com/GeoNode/geonode-project/issues/570
 from geonode.urls import urlpatterns as geonode_urlpatterns, handler500  # noqa
 
-from geonode_project.avdp.views import quality_report
+from geonode_project.avdp.views import change_history, quality_report
 
 # AVDP pages are registered before GeoNode's patterns.
 urlpatterns = [
@@ -36,4 +36,5 @@ urlpatterns = [
         name="avdp_upload_guide",
     ),
     path("avdp/quality/<int:pk>/", quality_report, name="avdp_quality_report"),
+    path("avdp/history/<int:pk>/", change_history, name="avdp_change_history"),
 ] + geonode_urlpatterns

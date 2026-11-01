@@ -52,6 +52,10 @@ class Command(BaseCommand):
         with transaction.atomic():
             groups = self._ensure_groups()
             self._grant_upload(groups["avdp-editors"])
+        from geonode_project.avdp.map_icons import install_print_header
+
+        if install_print_header():
+            self.stdout.write("Print layouts: AVDP header installed.")
         self.stdout.write(self.style.SUCCESS("AVDP setup complete."))
 
     def _load_thesauri(self):

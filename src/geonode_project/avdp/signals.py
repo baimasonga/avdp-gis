@@ -46,7 +46,7 @@ def style_execution(exec_id):
     from geonode.layers.models import Dataset
     from geonode.resource.models import ExecutionRequest
     from geonode.upload.models import ResourceHandlerInfo
-    from geonode_project.avdp import quality, smart_mapping
+    from geonode_project.avdp import history, quality, smart_mapping
 
     execution = ExecutionRequest.objects.filter(exec_id=exec_id).first()
     if not execution or execution.status != ExecutionRequest.STATUS_FINISHED:
@@ -63,6 +63,10 @@ def style_execution(exec_id):
             logger.info("AVDP smart style for %s: %s", dataset.alternate, result)
         except Exception:
             logger.exception("AVDP smart style failed for %s", dataset.alternate)
+        try:
+            history.enable(dataset)
+        except Exception:
+            logger.exception("AVDP change history not enabled for %s", dataset.alternate)
         try:
             result = quality.run_and_save(dataset)
             logger.info("AVDP data check for %s: %s", dataset.alternate, result["summary"])

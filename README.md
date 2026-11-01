@@ -154,6 +154,25 @@ duplicates, invalid shapes, empty columns, district labels); the result is
 shown on the dataset's map page. Re-check existing datasets with
 `docker compose exec django python manage.py avdp_quality_check`.
 
+### Field surveys (KoboToolbox / ODK Central)
+
+Put the API token in `.env` (`KOBO_TOKEN`, or `ODK_TOKEN` / `ODK_USER` +
+`ODK_PASSWORD`), restart, then:
+
+```bash
+docker compose exec django python manage.py avdp_sync_form kobo --server https://kf.kobotoolbox.org --form <asset uid> --name water_point_survey --share
+```
+
+Run the same command again (or on a schedule) to refresh the dataset.
+
+### More commands
+
+| Task | Command (prefix `docker compose exec django python manage.py`) |
+|---|---|
+| Change history on/off, or list changes | `avdp_track_changes --all` · `avdp_track_changes <name> --show` |
+| Map story (after the district summary) | `avdp_story` |
+| Re-style datasets / turn on time slider | `avdp_style_datasets` |
+
 ## Documentation
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, versions, customisations

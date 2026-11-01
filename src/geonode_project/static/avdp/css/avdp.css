@@ -1110,3 +1110,10 @@
     font-size: 1.1rem;
     margin: 1.5rem 0 0.5rem 0;
 }
+
+/* Change history page */
+.avdp-crumb { margin: 0; font-size: 0.9rem; }
+.avdp-history td { vertical-align: top; }
+.avdp-history del { color: var(--avdp-muted); }
+.avdp-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.avdp-quality-foot a { color: var(--avdp-forest, #1f5d3a); font-weight: 600; }

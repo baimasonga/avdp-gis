@@ -98,6 +98,27 @@ Note: datasets uploaded through **Upload Data** get GeoServer's default
 style; the AVDP cartography is applied only by `avdp_import_demo` (or by
 uploading an SLD in the dataset's style editor).
 
+## Iteration 8 — feature batch 2
+
+- **KoboToolbox / ODK Central link** (`avdp/fieldsync.py`,
+  `avdp_sync_form`): create, then refresh in place; personal-data questions
+  dropped by default. Verified against a local stand-in using the documented
+  API shapes only; **untested against a real server**. Found: letting the
+  upload hook style the new dataset while the command updated it caused a
+  database deadlock; the command now styles synchronously.
+- **Time slider**: date columns become a WMS time dimension automatically
+  (verified with a 24-record dated CSV: timeline appears, capabilities list
+  the dates).
+- **Printing**: AVDP text header in all print layouts, output
+  `AVDP-Map-<date>.pdf` (verified with a real PDF from GeoServer).
+- **Change history** (`avdp/history.py`, trigger + `avdp_change_log`,
+  `/avdp/history/<id>/`, `avdp_track_changes`): verified an editor's map
+  edit and revert are logged as "map editor" with old/new values. Cannot
+  record which editor (single GeoServer DB account).
+- **Map story** `avdp_story` (cover and chapters over live maps).
+- 6 new unit tests (48 total); `security_smoke.py` 64/64; anonymous access
+  to data-check and history pages returns 404.
+
 ## Iteration 7 — feature batch 1
 
 - **Backup/restore** (`scripts/avdp-backup.sh`, `scripts/avdp-restore.sh`):

@@ -62,6 +62,62 @@ attribute is a label supplied with the data. Do not use GeoNode *Regions* to
 claim district coverage unless the features were checked against official
 district boundaries; record the verification in the data quality statement.
 
+## Field surveys: KoboToolbox and ODK Central
+
+`avdp_sync_form` publishes a form's submissions as a point dataset and, on
+later runs, replaces its records in place (same dataset, maps and
+dashboards keep working):
+
+```bash
+# KoboToolbox (KOBO_TOKEN in .env: Account settings → API key)
+docker compose exec django python manage.py avdp_sync_form kobo --server https://kf.kobotoolbox.org --form <asset uid> --name water_point_survey --share
+# ODK Central (ODK_TOKEN, or ODK_USER + ODK_PASSWORD in .env)
+docker compose exec django python manage.py avdp_sync_form odk --server https://central.example.org --project 3 --form water_points --name water_point_survey --share
+```
+
+- The first GPS question becomes the location; submissions without one are
+  skipped (and counted in the output). Group names are dropped from column
+  names; system fields are left out except the submission id and time.
+- Questions whose names suggest personal data (names, phone, e-mail, ID
+  numbers…) are **not copied**; list any you need with `--keep-personal`,
+  and exclude others with `--exclude`.
+- New datasets are private to the owner; `--share` gives AVDP Viewers and
+  Editors access, `--public` also visitors.
+- New questions added to the form later are reported and ignored; delete the
+  dataset and sync again to include them.
+- Photos and other attachments stay on the survey server (they need its
+  login); copy the ones you want to publish into Documents.
+- Schedule it to keep data current: cron on a server
+  (`0 * * * * cd /srv/avdp-gis && docker compose exec -T django python manage.py avdp_sync_form …`)
+  or Windows Task Scheduler on a laptop.
+
+Verified here against a local stand-in answering in the documented
+KoboToolbox v2 and ODK Central OData formats (create, refresh 11 → 15
+records, refused token, ODK nested groups); **not yet run against a real
+KoboToolbox or ODK server**.
+
+## Time slider, printing, change history, map story
+
+- **Time slider.** A dataset with a date column (`distribution_date`,
+  `date`, `submitted`, …, typed as a date by the import) gets a WMS time
+  dimension automatically; the map viewer then shows a timeline to step or
+  play through the dates.
+- **Printing.** Print layouts carry an AVDP text header instead of the
+  GeoNode image (installed by `avdp_setup`; the original is kept as
+  `printing/print_header.geonode.png`) and files are named
+  `AVDP-Map-<date>.pdf`.
+- **Change history.** Every dataset uploaded after this release records
+  added, changed and deleted records (time, old and new values, and whether
+  the change came from the map editor, a form sync or an upload/script) in
+  `avdp_change_log`; open it from the dataset's "Data check" note → *Change
+  history* (needs download permission) or `avdp_track_changes <name> --show`.
+  Browser edits all reach the database through GeoServer's account, so the
+  log cannot say *which* editor made a change. Turn it on for older datasets
+  with `avdp_track_changes --all`.
+- **Map story.** `avdp_story` creates *AVDP at district level*: a scrolling
+  story with the district summary and water points as live maps behind the
+  text. Edit it in the portal like any GeoNode story.
+
 ## District boundaries, summary and dashboard
 
 ### Boundaries (once)
