@@ -1,0 +1,9 @@
+site_id,name,latitude,longitude,district,chiefdom,water_point_type,status,beneficiaries,year_built,photo_url,remarks
+PRACTICE-WP-01,Practice water point 1,7.964,-11.738,Bo,,Hand-dug well,Not functional,542,2024,/static/avdp/img/example-photo.jpg,Practice record (invented)
+PRACTICE-WP-02,Practice water point 2,7.877,-11.19,Kenema,,Protected spring,Functional,269,2024,/static/avdp/img/example-photo.jpg,Practice record (invented)
+PRACTICE-WP-03,Practice water point 3,8.645,-10.971,Kono,,Hand-dug well,Functional,176,2022,/static/avdp/img/example-photo.jpg,Practice record (invented)
+PRACTICE-WP-04,Practice water point 4,8.887,-12.047,Bombali,,Hand-dug well,Functional,172,2009,,Practice record (invented)
+PRACTICE-WP-05,Practice water point 5,8.74,-11.79,Tonkolili,,Protected spring,Not functional,543,2013,,Practice record (invented)
+PRACTICE-WP-06,Practice water point 6,8.484,-13.231,Western Area Urban,,Protected spring,Functional,621,2010,,Practice record (invented)
+PRACTICE-WP-07,Practice water point 7,7.528,-12.505,Bonthe,,Borehole,Functional,274,2015,,Practice record (invented)
+PRACTICE-WP-08,Practice water point 8,9.17,-12.92,Kambia,,Protected spring,Functional,876,2022,,Practice record (invented)

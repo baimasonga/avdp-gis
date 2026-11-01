@@ -147,3 +147,19 @@ class DashboardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PhotoAndSridTests(unittest.TestCase):
+    def test_photo_column_becomes_picture(self):
+        from geonode_project.avdp.feature_info import build_template
+
+        html = build_template("Water points", ["name", "status", "photo_url", "remarks"])
+        self.assertIn('<img class="avdp-fi-photo" src="${properties.photo_url}"', html)
+        self.assertNotIn("<th>Photo</th>", html)  # shown as the picture, not as a table row
+
+    def test_unknown_srid_is_treated_as_wgs84(self):
+        from geonode_project.avdp.districts import geom_sql
+
+        sql = geom_sql("t", "geom")
+        self.assertIn("ST_SRID(t.\"geom\") = 0", sql)
+        self.assertIn("ST_SetSRID(t.\"geom\", 4326)", sql)

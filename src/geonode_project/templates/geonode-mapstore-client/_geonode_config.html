@@ -72,4 +72,75 @@
         window.addEventListener('DOMContentLoaded', update);
     })();
 </script>
+<script>
+    // AVDP: on a dataset's map page, show the latest automatic data check
+    // (avdp/quality.py) as a small note that opens a list of the issues.
+    (function () {
+        var LEVELS = { problem: 'Problem', warning: 'Warning', info: 'Note' };
+
+        function box() {
+            var el = document.getElementById('avdp-quality');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'avdp-quality';
+                el.className = 'avdp-quality';
+                el.innerHTML = '<button type="button" class="avdp-quality-chip" aria-expanded="false" aria-controls="avdp-quality-panel"><span class="avdp-quality-dot"></span><span class="avdp-quality-label"></span></button>' +
+                    '<div class="avdp-quality-panel" id="avdp-quality-panel" hidden><p class="avdp-quality-head"></p><ul></ul><p class="avdp-quality-foot"></p></div>';
+                var chip = el.querySelector('button');
+                chip.addEventListener('click', function () {
+                    var panel = el.querySelector('.avdp-quality-panel');
+                    panel.hidden = !panel.hidden;
+                    chip.setAttribute('aria-expanded', String(!panel.hidden));
+                });
+                document.body.appendChild(el);
+            }
+            return el;
+        }
+
+        function text(tag, cls, value) {
+            var node = document.createElement(tag);
+            if (cls) { node.className = cls; }
+            node.textContent = value;
+            return node;
+        }
+
+        function render(data) {
+            var el = box();
+            el.setAttribute('data-status', data.status);
+            el.querySelector('.avdp-quality-label').textContent = data.status === 'ok' ? 'Data check: no issues' : 'Data check: ' + data.summary.replace(/ in \d+ features\.$/, '');
+            el.querySelector('.avdp-quality-head').textContent = data.summary;
+            var list = el.querySelector('ul');
+            list.innerHTML = '';
+            (data.issues || []).forEach(function (issue) {
+                var li = document.createElement('li');
+                li.className = 'avdp-quality-' + issue.level;
+                li.appendChild(text('strong', '', LEVELS[issue.level] || issue.level));
+                li.appendChild(text('span', '', ' ' + issue.message));
+                if (issue.examples && issue.examples.length) {
+                    li.appendChild(text('small', '', 'For example: ' + issue.examples.slice(0, 3).join('; ')));
+                }
+                list.appendChild(li);
+            });
+            el.querySelector('.avdp-quality-foot').textContent = 'Checked ' + new Date(data.checked).toLocaleString() + '. Checks run after each upload.';
+            el.querySelector('.avdp-quality-panel').hidden = true;
+            el.querySelector('button').setAttribute('aria-expanded', 'false');
+            el.style.display = 'block';
+        }
+
+        function update() {
+            var el = document.getElementById('avdp-quality');
+            var match = /#\/dataset\/(\d+)/.exec(window.location.hash || '');
+            if (!match) { if (el) { el.style.display = 'none'; } return; }
+            fetch('/avdp/quality/' + match[1] + '/', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) {
+                    if (data) { render(data); } else if (el) { el.style.display = 'none'; }
+                })
+                .catch(function () { if (el) { el.style.display = 'none'; } });
+        }
+
+        window.addEventListener('hashchange', update);
+        window.addEventListener('DOMContentLoaded', update);
+    })();
+</script>
 {% endblock %}

@@ -1003,3 +1003,110 @@
         display: none;
     }
 }
+
+/* ------------------------------------------------------------------ */
+/* Data check note on dataset map pages (avdp/quality.py)               */
+/* ------------------------------------------------------------------ */
+.avdp-quality {
+    display: none;
+    position: fixed;
+    left: calc(0.75rem + env(safe-area-inset-left, 0px));
+    bottom: 7.25rem;
+    z-index: 2147482000;
+    max-width: min(26rem, calc(100vw - 1.5rem));
+    font-family: var(--avdp-font, inherit);
+}
+.avdp-quality-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid var(--avdp-line-strong, #c9c2b1);
+    background: var(--avdp-surface, #fff);
+    color: var(--avdp-ink, #14232e);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(20, 35, 46, 0.15);
+    cursor: pointer;
+}
+.avdp-quality-chip:focus-visible {
+    outline: 2px solid var(--avdp-forest, #1f5d3a);
+    outline-offset: 2px;
+}
+.avdp-quality-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: #2f7d4a;
+}
+.avdp-quality[data-status="warnings"] .avdp-quality-dot { background: #d08c17; }
+.avdp-quality[data-status="problems"] .avdp-quality-dot { background: #b03a2e; }
+.avdp-quality-panel {
+    margin-top: 0.4rem;
+    background: var(--avdp-surface, #fff);
+    color: var(--avdp-ink, #14232e);
+    border: 1px solid var(--avdp-line, #e2ddd1);
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    box-shadow: 0 6px 20px rgba(20, 35, 46, 0.18);
+    max-height: 50vh;
+    overflow: auto;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+.avdp-quality-panel[hidden] { display: none; }
+.avdp-quality-panel ul {
+    list-style: none;
+    margin: 0.5rem 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+.avdp-quality-panel li {
+    border-left: 3px solid #7d8790;
+    padding-left: 0.6rem;
+}
+.avdp-quality-panel li.avdp-quality-problem { border-left-color: #b03a2e; }
+.avdp-quality-panel li.avdp-quality-warning { border-left-color: #d08c17; }
+.avdp-quality-panel small {
+    display: block;
+    color: var(--avdp-muted, #4f5d66);
+}
+.avdp-quality-head { margin: 0; font-weight: 600; }
+.avdp-quality-foot { margin: 0; color: var(--avdp-muted, #4f5d66); font-size: 0.78rem; }
+
+/* Photo in feature pop-ups (photo_url column); hidden when the value is empty */
+.avdp-fi-photo {
+    display: block;
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin: 6px 0 8px 0;
+    background: var(--avdp-line, #e2ddd1);
+}
+.avdp-fi-photo[src=""],
+.avdp-fi-photo[src="undefined"],
+.avdp-fi-photo[src="null"] {
+    display: none;
+}
+
+/* Data guide: section links */
+.avdp-guide-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin: 0.5rem 0 1.5rem 0;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--avdp-line);
+    border-bottom: 1px solid var(--avdp-line);
+}
+.avdp-guide-toc a {
+    color: var(--avdp-forest);
+    font-weight: 500;
+}
+.avdp-page h3 {
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.5rem 0;
+}

@@ -122,6 +122,16 @@ snapshot support where available.
 
 ## Backups
 
+`scripts/avdp-backup.sh` makes one archive of everything (both databases,
+GeoServer data directory, uploads, and `.env` unless `--no-secrets`);
+`scripts/avdp-restore.sh <archive>` restores it into fresh volumes. Verified:
+a full backup restored on top of wiped volumes came back with the same
+resources and users, 64/64 security checks and a working dashboard. For a
+server, run the backup nightly from cron with `--no-secrets` (keep `.env`
+backed up separately) and copy the archive off-site.
+
+The individual commands, if you prefer them:
+
 Run nightly (cron on the host), keep at least 7 daily + 4 weekly copies
 off-server, and test restores quarterly.
 

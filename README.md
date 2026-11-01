@@ -129,6 +129,31 @@ docker compose exec django python manage.py avdp_district_check
 
 Details: [docs/DATA_IMPORT.md](docs/DATA_IMPORT.md#district-boundaries-summary-and-dashboard).
 
+### Back up, restore, move to another computer
+
+```bash
+scripts/avdp-backup.sh
+```
+
+writes `backups/avdp-backup-<date>.tar.gz` with both databases, the GeoServer
+data directory, uploaded files and `.env` (so it contains passwords; add
+`--no-secrets` to leave `.env` out). On the other computer: clone the
+repository, `docker compose build`, copy the archive into the folder and run
+
+```bash
+scripts/avdp-restore.sh backups/avdp-backup-<date>.tar.gz
+```
+
+which **replaces all portal data there** with the backup (it asks you to type
+RESTORE first).
+
+### Data checks
+
+Every upload is checked automatically (location inside Sierra Leone,
+duplicates, invalid shapes, empty columns, district labels); the result is
+shown on the dataset's map page. Re-check existing datasets with
+`docker compose exec django python manage.py avdp_quality_check`.
+
 ## Documentation
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, versions, customisations

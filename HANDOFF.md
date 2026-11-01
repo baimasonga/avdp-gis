@@ -98,6 +98,26 @@ Note: datasets uploaded through **Upload Data** get GeoServer's default
 style; the AVDP cartography is applied only by `avdp_import_demo` (or by
 uploading an SLD in the dataset's style editor).
 
+## Iteration 7 — feature batch 1
+
+- **Backup/restore** (`scripts/avdp-backup.sh`, `scripts/avdp-restore.sh`):
+  one archive, laptop-to-laptop moves. Verified by wiping all volumes and
+  restoring: same counts, 64/64 security checks, dashboard and thumbnails OK.
+  Found: PostGIS's `spatial_ref_sys` rows must be skipped on restore.
+- **Data check on upload** (`avdp/quality.py`, model `QualityReport`,
+  migration `0001`, `/avdp/quality/<id>/`, "Data check" note on dataset
+  pages, `avdp_quality_check`). Verified with a planted-error upload: point
+  at sea, swapped coordinates (hint shown), duplicate, empty column and a
+  wrong district label all reported.
+- **Spreadsheet templates** for the seven themes plus a practice file;
+  **photos** in pop-ups from a `photo_url` column; **data guide** extended
+  into an editor guide (templates, data check, editing, photos, districts).
+- **Browser editing** already works in GeoNode (*Edit → Edit data*): verified
+  an AVDP Editor's WFS-T change is saved and an AVDP Viewer's is refused.
+- Found and fixed: CSV uploads are stored with SRID 0, which broke the
+  district check/summary and the data check for CSV data; unknown SRIDs are
+  now treated as EPSG:4326 (as GeoNode publishes them).
+
 ## Iteration 6 — district boundaries and dashboard
 
 - `avdp_load_boundaries`: official district boundaries (OCHA COD-AB,

@@ -9,6 +9,23 @@ GeoTIFF. Uploads are processed by GeoNode's importer in the background and are
 **private** to the uploader and administrators until shared. The public data
 guide is at `/upload-guide/`.
 
+**Spreadsheet templates.** `/static/avdp/templates/` holds one CSV template
+per AVDP theme (linked from the data guide, section *Spreadsheet templates*)
+with `latitude`/`longitude` columns (roads use a `wkt_geom` line), plus a
+practice file of eight invented water points. Column names match the
+portal's pop-up labels and style rules (status, crop, condition…).
+
+**Automatic data check.** After the automatic style, every upload is checked
+(`avdp/quality.py`): features without location or outside Sierra Leone's
+districts (with a hint when latitude/longitude look swapped), invalid shapes,
+exact duplicate locations, empty or mostly empty columns (optional columns
+such as `photo_url` and `remarks` only as notes) and district labels that
+disagree with the location. The report is stored (`QualityReport`, shown on
+the dataset's map page as "Data check: …", visible to whoever may view the
+dataset via `/avdp/quality/<id>/`). Re-run with `manage.py avdp_quality_check`.
+
+**Photos.** A `photo_url`/`photo` column is shown as a picture in the pop-up.
+
 **Automatic styling ("smart mapping").** When a vector upload finishes, the
 portal replaces GeoServer's generic style (e.g. red squares) with an AVDP
 style chosen from the data (see docs/ARCHITECTURE.md → *Smart mapping*), sets

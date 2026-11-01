@@ -1,5 +1,8 @@
 """Style newly uploaded vector datasets automatically (see avdp.smart_mapping).
 
+After styling, the automatic data check (avdp/quality.py) runs and its report
+is shown on the dataset's map page.
+
 The GeoNode importer finishes an upload inside its Celery task
 ``geonode.upload.import_orchestrator`` and marks the ExecutionRequest as
 finished with a queryset ``update()``, which sends no Django model signal.
@@ -43,7 +46,7 @@ def style_execution(exec_id):
     from geonode.layers.models import Dataset
     from geonode.resource.models import ExecutionRequest
     from geonode.upload.models import ResourceHandlerInfo
-    from geonode_project.avdp import smart_mapping
+    from geonode_project.avdp import quality, smart_mapping
 
     execution = ExecutionRequest.objects.filter(exec_id=exec_id).first()
     if not execution or execution.status != ExecutionRequest.STATUS_FINISHED:
@@ -60,6 +63,11 @@ def style_execution(exec_id):
             logger.info("AVDP smart style for %s: %s", dataset.alternate, result)
         except Exception:
             logger.exception("AVDP smart style failed for %s", dataset.alternate)
+        try:
+            result = quality.run_and_save(dataset)
+            logger.info("AVDP data check for %s: %s", dataset.alternate, result["summary"])
+        except Exception:
+            logger.exception("AVDP data check failed for %s", dataset.alternate)
 
 
 def _cache():
@@ -72,7 +80,7 @@ def _key(exec_id):
 
 
 def suppress(exec_id):
-    """Skip the automatic style for one upload (used by avdp_import_demo, which styles its own layers)."""
+    """Skip the automatic style and data check for one upload (for commands that do their own)."""
     _cache().set(_key(exec_id), 1, timeout=24 * 3600)
 
 

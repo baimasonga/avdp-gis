@@ -60,6 +60,16 @@ def _cursor():
     return connections[datastore()].cursor()
 
 
+def geom_sql(alias, column):
+    """SQL for a geometry column with a known SRID.
+
+    CSV uploads are stored with SRID 0 although GeoNode publishes them as
+    EPSG:4326 (latitude/longitude); treat an unknown SRID as 4326.
+    """
+    ref = f"{alias}.{quote(column)}"
+    return f"(CASE WHEN ST_SRID({ref}) = 0 THEN ST_SetSRID({ref}, 4326) ELSE {ref} END)"
+
+
 def locate(dataset, label_field=None):
     """Yield (fid, name, label, district, pcode) for each feature of ``dataset``."""
     bds = boundary_dataset()
@@ -79,7 +89,7 @@ def locate(dataset, label_field=None):
     sql = (
         f"SELECT {', '.join(select)} FROM {quote(dataset.name)} t "
         f"LEFT JOIN {quote(bds.name)} b ON ST_Intersects(b.{quote(bgeom)}, "
-        f"ST_Transform(ST_PointOnSurface(t.{quote(geom)}), ST_SRID(b.{quote(bgeom)}))) "
+        f"ST_Transform(ST_PointOnSurface({geom_sql('t', geom)}), ST_SRID(b.{quote(bgeom)}))) "
         f"WHERE t.{quote(geom)} IS NOT NULL"
     )
     with _cursor() as cursor:

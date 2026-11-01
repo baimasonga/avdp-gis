@@ -4,13 +4,23 @@
 {% block container %}
 <main class="avdp-page" id="main-content">
     <h1>{% trans "Data guide" %}</h1>
-    <p>{% trans "How to prepare, upload, describe and share GIS data in the AVDP GIS Portal." %}</p>
+    <p>{% trans "How to prepare, upload, check, describe, correct and share GIS data in the AVDP GIS Portal." %}</p>
+    <nav class="avdp-guide-toc" aria-label="{% trans 'Sections' %}">
+        <a href="#prepare">{% trans "Prepare" %}</a>
+        <a href="#templates">{% trans "Spreadsheet templates" %}</a>
+        <a href="#upload">{% trans "Upload and data check" %}</a>
+        <a href="#metadata">{% trans "Describe" %}</a>
+        <a href="#style">{% trans "Style and share" %}</a>
+        <a href="#edit">{% trans "Correct data" %}</a>
+        <a href="#photos">{% trans "Photos" %}</a>
+        <a href="#districts">{% trans "Districts and dashboard" %}</a>
+    </nav>
 
     <div class="avdp-info" role="note">
         {% blocktrans %}New uploads are <strong>private</strong>: only you and portal administrators can see them until you share them with people or groups, or make them public from the resource's <em>Share</em> settings.{% endblocktrans %}
     </div>
 
-    <h2>{% trans "1. Prepare your data" %}</h2>
+    <h2 id="prepare">{% trans "1. Prepare your data" %}</h2>
     <div class="avdp-table-wrap">
     <table class="avdp-table">
         <caption class="sr-only">{% trans "Accepted formats" %}</caption>
@@ -34,7 +44,26 @@
         <li>{% trans "Archives that contain absolute paths, '..' path segments, symbolic links or extreme compression ratios are rejected for security reasons." %}</li>
     </ul>
 
-    <h2>{% trans "2. Upload" %}</h2>
+    <h3 id="templates">{% trans "Spreadsheet templates" %}</h3>
+    <p>{% blocktrans %}Partners without GIS software can fill in a spreadsheet: one row per site, coordinates in decimal degrees (for example latitude 7.964, longitude -11.738). Download a template, fill it in with Excel or LibreOffice, and save it as <strong>CSV (UTF-8)</strong>. Keep the column names; leave optional cells empty rather than writing "n/a".{% endblocktrans %}</p>
+    <div class="avdp-table-wrap">
+    <table class="avdp-table">
+        <caption class="sr-only">{% trans "Spreadsheet templates" %}</caption>
+        <thead><tr><th scope="col">{% trans "Template" %}</th><th scope="col">{% trans "Main columns" %}</th></tr></thead>
+        <tbody>
+            <tr><td><a href="/static/avdp/templates/avdp_water_points_template.csv">{% trans "Water points" %}</a></td><td>water_point_type, status (Functional / Needs repair / Not functional), beneficiaries, year_built</td></tr>
+            <tr><td><a href="/static/avdp/templates/avdp_grain_stores_template.csv">{% trans "Grain stores" %}</a></td><td>store_type, capacity_t, status, managed_by</td></tr>
+            <tr><td><a href="/static/avdp/templates/avdp_farmer_groups_template.csv">{% trans "Farmer groups" %}</a></td><td>group_type, members, women_members, main_crop, registered (yes / no)</td></tr>
+            <tr><td><a href="/static/avdp/templates/avdp_distribution_sites_template.csv">{% trans "Input distribution sites" %}</a></td><td>input_type, quantity, unit, distribution_date (YYYY-MM-DD), beneficiaries</td></tr>
+            <tr><td><a href="/static/avdp/templates/avdp_demonstration_plots_template.csv">{% trans "Demonstration plots" %}</a></td><td>technology, crop, area_ha, start_date, farmers_trained</td></tr>
+            <tr><td><a href="/static/avdp/templates/avdp_farm_plots_template.csv">{% trans "Farm plots (as points)" %}</a></td><td>farmer_group, crop, area_ha, season</td></tr>
+            <tr><td><a href="/static/avdp/templates/avdp_feeder_roads_template.csv">{% trans "Feeder roads" %}</a></td><td>{% trans "wkt_geom holds the road line, e.g. LINESTRING(-11.74 7.96, -11.70 7.99); surface, condition, length_km" %}</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p>{% blocktrans %}Every template also has district, chiefdom, photo_url and remarks columns. To practise, upload the <a href="/static/avdp/templates/practice_water_points.csv">practice file</a> (eight invented water points). Do not enter names of individual farmers or other personal data.{% endblocktrans %}</p>
+
+    <h2 id="upload">{% trans "2. Upload" %}</h2>
     <p>
         {% if request.user.is_authenticated %}
             {% blocktrans %}Go to <a href="/catalogue/#/upload/dataset">Upload Data</a>, drag in your files and start the upload. Processing continues in the background; the dataset appears under <a href="/datasets#/?f=dataset&amp;f=my-resources">your datasets</a> when it is ready.{% endblocktrans %}
@@ -43,7 +72,20 @@
         {% endif %}
     </p>
 
-    <h2>{% trans "3. Describe the dataset (metadata)" %}</h2>
+    <h3>{% trans "What happens after the upload" %}</h3>
+    <ul>
+        <li>{% trans "The portal styles the dataset from its contents: theme symbols when the name suggests one (water points, stores, roads…), colours from a status or type column, labels when zoomed in, and a readable pop-up." %}</li>
+        <li>{% blocktrans %}It runs a <strong>data check</strong>. Open the dataset: the note at the bottom left says "Data check: no issues" or lists what to look at, with examples:{% endblocktrans %}
+            <ul>
+                <li>{% trans "Problem: features with no location, or outside Sierra Leone's districts (at sea or abroad); the check says when latitude and longitude look swapped." %}</li>
+                <li>{% trans "Warning: invalid shapes, two features at exactly the same place, a district label that disagrees with where the feature lies, and columns that are mostly empty." %}</li>
+                <li>{% trans "Note: optional columns left empty, and labels that are not district names." %}</li>
+            </ul>
+        </li>
+        <li>{% trans "Fix problems in your file and upload it again (or correct them in the browser, below), then delete the faulty version." %}</li>
+    </ul>
+
+    <h2 id="metadata">{% trans "3. Describe the dataset (metadata)" %}</h2>
     <p>{% trans "Open the dataset, choose Edit → Edit metadata, and complete at least:" %}</p>
     <ul>
         <li>{% trans "Title and abstract (what the data shows and why it was collected)." %}</li>
@@ -55,13 +97,31 @@
     </ul>
     <p>{% trans "District names stored in attribute tables are labels supplied with the data. They are not a verified spatial assignment unless the metadata says the data was checked against official district boundaries." %}</p>
 
-    <h2>{% trans "4. Style and share" %}</h2>
+    <h2 id="style">{% trans "4. Style and share" %}</h2>
     <ul>
         <li>{% trans "The portal styles new vector datasets automatically: features are coloured by a status or type field when there is one, labelled when you zoom in, and given a readable pop-up." %}</li>
         <li>{% trans "In a map, open the layer's settings and the Style tab to switch between the default style and alternatives: single symbol, heat map, clusters, or sized/shaded by a number field." %}</li>
         <li>{% trans "Edit → Edit style lets you change symbols and colours; the legend updates automatically." %}</li>
         <li>{% trans "Share lets you grant view, download, edit or manage rights to individual users or groups (for example AVDP Viewers or AVDP Editors)." %}</li>
         <li>{% trans "Only make a dataset public when its owner has approved it for public release." %}</li>
+    </ul>
+
+    <h2 id="edit">{% trans "5. Correct data in the browser" %}</h2>
+    <p>{% blocktrans %}Members of <strong>AVDP Editors</strong> (and owners) can fix individual records without uploading again: open the dataset, choose <em>Edit → Edit data</em>, select a feature in the table or on the map, change its values or move it, and save. AVDP Viewers can look and download but cannot change anything.{% endblocktrans %}</p>
+    <ul>
+        <li>{% trans "Use it for small corrections: a wrong status, a misspelt name, a point in the wrong place." %}</li>
+        <li>{% trans "For many changes, correct the source file and upload a new version instead, so your files and the portal stay the same." %}</li>
+        <li>{% trans "After larger changes an administrator can re-run the data check (manage.py avdp_quality_check)." %}</li>
+    </ul>
+
+    <h2 id="photos">{% trans "6. Photos" %}</h2>
+    <p>{% blocktrans %}A column named <code>photo_url</code> (or <code>photo</code>) is shown as a picture at the top of the feature pop-up. Upload site photos as <a href="/documents">Documents</a> (Upload Data → document), share them like the dataset, and paste each photo's address into the row. Photos of people need their consent; prefer photos of the facility.{% endblocktrans %}</p>
+
+    <h2 id="districts">{% trans "7. Districts, summary and dashboard" %}</h2>
+    <ul>
+        <li>{% trans "The official district boundaries (Government of Sierra Leone / OCHA, 16 districts) are a dataset in the catalogue; add them to any map." %}</li>
+        <li>{% trans "The District summary counts features per AVDP category in each district, for datasets that have an AVDP dataset category and are shared with AVDP Viewers or the public. Set the category in the metadata so your data is counted." %}</li>
+        <li>{% blocktrans %}The <a href="/dashboards">AVDP district overview</a> dashboard shows the totals. Administrators refresh both after new data is shared (manage.py avdp_district_summary, then avdp_dashboard).{% endblocktrans %}</li>
     </ul>
 
     <h2 id="demo-data">{% trans "Demonstration data" %}</h2>

@@ -45,7 +45,7 @@ from geonode.upload.models import ResourceHandlerInfo
 
 from geonode_project.avdp import demo_package as dp
 from geonode_project.avdp import signals as avdp_signals
-from geonode_project.avdp import smart_mapping, styles
+from geonode_project.avdp import quality, smart_mapping, styles
 from geonode_project.avdp.feature_info import build_template
 from geonode_project.avdp.map_icons import publish_icons
 from geonode_project.avdp.demo_map import MAP_MARKER, MAP_TITLE, build_map_payload
@@ -312,6 +312,7 @@ class Command(BaseCommand):
         self._apply_style(spec, dataset, files)
         # Offer the alternative views (heat map, clusters, ...) next to the theme style.
         smart_mapping.apply(dataset, replace_default=False, popup=False, thumbnail=False)
+        self.stdout.write(f"{spec.title}: data check: {quality.run_and_save(dataset)['summary']}")
         self._refresh_thumbnail(dataset)
         self._apply_permissions(dataset)
         self.stdout.write(f"{spec.title}: metadata, style and sharing applied.")

@@ -80,3 +80,7 @@ docker-compose.override.yml
 .local/
 src/celerybeat-schedule*
 src/invoke.log
+
+# Portal backups (contain data and, by default, passwords)
+backups/
+.env.before-restore-*
