@@ -1089,7 +1089,8 @@
 .avdp-fi-photo[src=""],
 .avdp-fi-photo[src="undefined"],
 .avdp-fi-photo[src="null"] {
-    display: none;
+    /* MapStore's identify panel sets display on images; an empty photo must stay hidden */
+    display: none !important;
 }
 
 /* Data guide: section links */
